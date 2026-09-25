@@ -1,0 +1,6 @@
+{
+  "testAccuracy": 0.9807,
+  "testCorrect": 9807,
+  "testTotal": 10000,
+  "samplesShipped": 20
+}

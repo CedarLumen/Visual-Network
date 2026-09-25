@@ -1,0 +1,296 @@
+{
+	"globsDependent" : 
+	[
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/*.cpp",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Data.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Engine.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Expr.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Lab.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Library.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Model.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/NetText.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Ops.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Theme.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/core/Train.cpp"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/*.cpp",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/gfx_font.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/gfx_loader.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/gfx_png.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/gfx_renderer.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gfx/gfx_window.cpp"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gpu/*.cpp",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gpu/gpu_eval.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gpu/gpu_host.cpp"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gpu/*.cu",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/gpu/gpu_cuda.cu"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/*.cpp",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/json.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_expr.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_geom.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_gfx.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_gpu.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_graph.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_loop.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_main.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_mnist.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_model.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_ops.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_store.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_train.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/tests/test_util.cpp"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/*.cpp",
+			"paths" : 
+			[
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/app.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/draw_canvas.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/draw_ui.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/ui.cpp",
+				"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/src/ui/ui_input.cpp"
+			],
+			"recurse" : true
+		}
+	],
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.31.6-msvc6/CMakeSystem.cmake"
+		},
+		{
+			"isExternal" : true,
+			"path" : "D:/download/vcpkg-2026.01.16/vcpkg-2026.01.16/scripts/buildsystems/vcpkg.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeDependentOption.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.31.6-msvc6/CMakeCXXCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/WindowsPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCXXInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/MSVC-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/MSVC.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows-MSVC-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows-MSVC.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.31.6-msvc6/CMakeRCCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeRCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Internal/CMakeCXXLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Internal/CMakeCommonLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Linker/Windows-MSVC-CXX.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Linker/Windows-MSVC.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/x64-Debug/CMakeFiles/3.31.6-msvc6/CMakeCUDACompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCUDAInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/NVIDIA-CUDA.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/NVIDIA.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows-NVIDIA-CUDA.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Windows-MSVC.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Internal/CMakeCUDALinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Internal/CMakeCommonLinkerInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Linker/Windows-MSVC-CUDA.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/Platform/Linker/Windows-MSVC.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/FindCUDAToolkit.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/FindPackageMessage.cmake"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug",
+		"source" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 1
+	}
+}

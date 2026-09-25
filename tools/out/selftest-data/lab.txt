@@ -1,0 +1,8 @@
+LAB 1
+IN px/255
+OUT v
+REW score
+TGT sin(3*in(0))
+FREQ 4
+LR 0.050000
+TR 1

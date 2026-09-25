@@ -1,0 +1,8 @@
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne_core.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne_gpu.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne_gfx.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne_cli.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/nne_tests.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
