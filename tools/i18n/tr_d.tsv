@@ -1,0 +1,159 @@
+数字写错了：	Bad number: 
+不认识的字符「	Unknown character "
+表达式是空的	The expression is empty.
+这里应该是「	Expected "
+let 后面要跟一个变量名	'let' must be followed by a variable name
+ 后面应该是「=」	 should be followed by "="
+没有名为 	No function named 
+ 的函数	 exists
+函数 	Function 
+ 需要 	 requires 
+ 个参数，实际 	 arguments, got 
+ 个	.
+表达式在这里就结束了，后面还缺内容	The expression ends here; content after it is missing
+这里不认识「	Variable 
+ 的变量	 is not recognized
+绝对值	Absolute value
+符号，负 -1 零 0 正 1	Sign: -1 for negative, 0 for zero, 1 for positive
+向下取整	Floor
+向上取整	Ceiling
+四舍五入	Round
+平方	Square
+平方根	Square root
+e 的幂	Exponential (e^x)
+自然对数	Natural logarithm
+正弦	Sine
+余弦	Cosine
+正切	Tangent
+双曲正切，输出 -1 到 1	Hyperbolic tangent, outputs -1 to 1
+输出 0 到 1	Outputs 0 to 1
+负值归零	Negative values become 0
+较小值	Minimum value
+较大值	Maximum value
+幂	Power
+取余	Modulo
+clamp(值, 下限, 上限)	clamp(value, lower bound, upper bound)
+lerp(起点, 终点, 比例)	lerp(start, end, ratio)
+step(阈值, 值) 大于等于阈值取 1	step(threshold, value); returns 1 when value >= threshold
+smoothstep(下, 上, 值) 平滑过渡	smoothstep(low, high, value); smooth transition
+if(条件, 真值, 假值)	if(condition, value if true, value if false)
+按参数取 0 到 1 的固定随机数	Fixed random number in [0, 1] computed from the argument
+按两个参数取 -1 到 1 的固定噪声	Fixed noise in [-1, 1] computed from two arguments
+in(k) 当前输入向量的第 k 个分量（从 0 数）	in(k): the k-th component of the current input vector (0-based)
+多余的内容「	Unexpected extra content "
+运算符：+ - * / %（取余）^（乘方，右结合）、( )、比较 < > <= >= == !=、	Operators: + - * / % (modulo), ^ (power, right-associative), ( ), comparisons < > <= >= == !=, 
+逻辑 && || !、三目 条件 ? 甲 : 乙。	logic && || !, ternary condition ? a : b.
+语句：用分号或换行分成多条；let 名字 = 表达式 可以先算一个中间量；	Statements: separate with semicolons or newlines; let name = expression precomputes an intermediate value;
+最后一条表达式的值就是函数的返回值。	The value of the last expression is the function's return value.
+常量：pi 圆周率、e 自然常数。比较与逻辑成立取 1，不成立取 0。	Constants: pi (the circle constant) and e (Euler's number). Comparisons and logic yield 1 when true and 0 when false.
+函数：	Functions:
+输入函数	Input function
+输出函数	Output function
+奖励函数	Reward function
+目标函数	Target function
+无法解析，这一步按默认公式 	Cannot be parsed, falls back to the default formula 
+ 计算：	 for this step:
+输入函数 	Input function 
+输出函数 	Output function 
+奖励函数 	Reward function 
+目标函数 	Target function 
+尚未开始循环	The loop has not started yet
+第 	Step 
+ 步的奖励 	 reward: 
+ · 平均奖励 	, mean reward 
+ · 判定正确 	, prediction correct 
+输入函数：给输入层的每一个位置求一个值，这个值就是网络收到的输入。	Input function: computes a value for every position of the input layer; that value is the input the network receives.
+c 通道号 · y 行号 · x 列号 · i 第几个位置（从 0 数）	c channel index, y row index, x column index, i position index (0-based)
+h 输入高度 · w 输入宽度 · ch 通道数 · n 位置总数	h input height, w input width, ch channel count, n total positions
+u 横向比例 · v 纵向比例，左上角 0 右/下侧 1	u horizontal ratio, v vertical ratio; 0 at the top-left, 1 at the right/bottom
+cx 居中横向坐标 · cy 居中纵向坐标，中心 0 边缘 1 或 -1	cx centered horizontal coordinate, cy centered vertical coordinate; 0 at the center, 1 or -1 at the edge
+rr 到中心的距离	rr distance from the center
+px 这一层在这个位置的原值：手写数字输入是 0 到 255 的像素，	px raw value of this layer at this position: for handwritten digit input it is a pixel from 0 to 255,
+自生成输入是 -1 到 1 的随机值	for random input it is a random value from -1 to 1
+t 循环步数 · k 当前示例序号 · count 示例个数 · label 当前示例真实数字	t loop step count, k current sample index, count number of samples, label true digit of the current sample
+默认 px/255：直接拿自带手写数字的原像素当输入，这就是原来的输入方式。	Default px/255: uses the raw pixel of the built-in handwritten digit as input; this is the original input method.
+接的是自生成输入元件时，把默认公式换成 px 就会原样使用它产生的随机值。	When a random input module is connected, replacing the default formula with px uses the values it generates as they are.
+输出函数：对网络的每一个输出单元求一个值，作为这一步的最终输出。	Output function: computes a value for every output unit of the network as the final output of this step.
+i 类别序号 · n 类别总数 · v 网络输出值 · p 该类的概率（Softmax）	i class index, n total classes, v network output value, p probability of that class (Softmax)
+top 最大概率 · pred 网络概率最大的类别 · label 真实类别 · t 步数 · k 示例序号	top highest probability, pred class with the highest network probability, label true class, t step count, k sample index
+判定类别取处理后输出值最大的那一类，循环里的奖励按这个判定算。	The prediction is the class with the largest processed output value; the reward in the loop is computed from this prediction.
+默认 v：不改动网络输出。	Default v: leaves the network output unchanged.
+奖励函数：每一步求一个数，作为这一步的得分。	Reward function: computes one number per step as the score for that step.
+pred 判定类别 · label 真实类别 · p 判定类别的概率 · top 最大概率	pred predicted class, label true class, p probability of the predicted class, top highest probability
+hit 判定正确为 1 否则 0（回归任务里损失小于 0.01 算命中）· n 类别总数	hit 1 when the prediction is correct and 0 otherwise (in regression tasks a loss below 0.01 counts as a hit), n total classes
+sum 输出值之和 · mean 输出值均值 · t 步数 · k 示例序号	sum sum of output values, mean average of output values, t step count, k sample index
+score 元件自己算出的基本得分 · loss 与期望输出的均方误差	score basic score computed by the module itself, loss mean squared error against the expected output
+默认 score：分类任务判定对得 1 分，回归任务得分是 1 减均方误差。	Default score: 1 point for a correct prediction in classification tasks; in regression tasks the score is 1 minus the mean squared error.
+例如写成 hit ? p : -1 就变成「判对拿该类别概率，判错扣 1 分」。	For example, writing hit ? p : -1 becomes "take the class probability when correct, subtract 1 point when wrong".
+目标函数：目标输出奖励元件用它算出这一步的期望输出，网络去逼近它。	Target function: the target-output reward module uses it to compute the expected output of this step, and the network approximates it.
+i 第几个输出单元 · n 输出个数 · v 网络在这个单元上的输出	i output unit index, n number of outputs, v network output at this unit
+in(k) 当前输入向量的第 k 个分量（从 0 数）· nin 输入向量的长度	in(k) the k-th component of the current input vector (0-based), nin length of the input vector
+t 步数 · k 示例序号 · label 真实数字（自带手写数字时才有意义）	t step count, k sample index, label true digit (meaningful only with the built-in handwritten digits)
+例：in(0) 直接照抄第一个输入；sin(3*in(0)) 学一条正弦曲线；	Example: in(0) copies the first input directly; sin(3*in(0)) learns a sine curve;
+in(0)+in(1) 学加法。	in(0)+in(1) learns addition.
+默认 sin(3*in(0))：拿第一个输入算一条正弦曲线，配上自生成输入就能看见收敛。	Default sin(3*in(0)): computes a sine curve from the first input; together with random input you can see it converge.
+图中没有模块	The graph has no modules
+没有输出层或目标输出元件，无法计算	No output layer or target-output module; cannot compute
+窗口大于上游尺寸	Window is larger than the upstream size
+有不支持的模块类型	Unsupported module type present
+输出端没接上数据流，这一步算不出结果	The output side is not connected to the data flow; this step produces no result
+梯度出现非有限值，这一步没有更新权重	The gradient contains non-finite values; weights were not updated in this step
+最大池化 	Max pooling 
+平均池化 	Average pooling 
+ 步长 	 stride 
+ 个自生成输入	 random inputs
+ 单元	 units
+这一层没有数据	This layer has no data
+没有输出层或目标输出元件，无法给出结果	No output layer or target-output module; cannot give a result
+画布是空的，没有可评估的网络	The canvas is empty; there is no network to evaluate
+图里有 %d 个模块，示例网络是 %d 个，批量评估只认示例网络结构	The graph has %d modules but the example network has %d; batch evaluation only accepts the example network structure
+第 	Step 
+ 个模块「	 "
+」与示例网络的「	" differs from the example network's "
+」参数不一致，批量评估只认示例网络结构	" in its parameters; batch evaluation only accepts the example network structure
+模块「	Module "
+」的上游不是执行顺序里的前一层，这条链接得不对	" has an upstream that is not the previous layer in execution order; this connection is wrong
+」的下游不是执行顺序里的后一层，这条链接得不对	" has a downstream that is not the next layer in execution order; this connection is wrong
+第一层不是输入层，批量评估只认示例网络结构	The first layer is not the input layer; batch evaluation only accepts the example network structure
+输入层通道数是 	The input layer has 
+，批量评估按灰度单通道图拼接	 channels; batch evaluation concatenates grayscale single-channel images
+输入层尺寸 	The input layer size 
+ 与调用方给的 	 does not match the 
+ 对不上	 given by the caller
+卷积 1 算不出输出（输入 	Convolution 1 cannot produce output (input 
+ 小于核 	 is smaller than the kernel 
+池化 1 算不出输出（卷积 1 输出 	Pooling 1 cannot produce output (convolution 1 output 
+ 小于窗口）	 is smaller than the window)
+卷积 2 算不出输出（池化 1 输出 	Convolution 2 cannot produce output (pooling 1 output 
+ 小于核）	 is smaller than the kernel)
+池化 2 算不出输出（卷积 2 输出 	Pooling 2 cannot produce output (convolution 2 output 
+权重形状对不上：	Weight shape mismatch: 
+ 需要 	 requires 
+ 个，实际 	 but got 
+ 个	.
+没有可用的预训练权重（w1/b1/w3 至少有一组是空的）	No pretrained weights available (at least one of w1/b1/w3 is empty)
+卷积 1 的核 w1	Convolution 1 kernel w1
+卷积 1 的偏置 b1	Convolution 1 bias b1
+卷积 2 的核 w2	Convolution 2 kernel w2
+卷积 2 的偏置 b2	Convolution 2 bias b2
+全连接的权重 w3	Dense weights w3
+全连接的偏置 b3	Dense bias b3
+样本数为 	Sample count is 
+，没有可评估的样本	; there are no samples to evaluate
+图像尺寸不对：	Wrong image size: 
+像素缩放系数必须大于 0（实际 	The pixel scale factor must be greater than 0 (actual 
+像素数据不够：需要 	Not enough pixel data: need 
+卷积 1 的产出形状不对（通道 	Convolution 1 output shape is wrong (channels 
+，样本数 	, samples 
+卷积 2 的产出形状不对（通道 	Convolution 2 output shape is wrong (channels 
+展平宽度与权重对不上：池化 2 输出 	Flattened width does not match the weights: pooling 2 output 
+ 通道、	 channels, 
+，每样本 	, per sample 
+ 个值，w3 需要 	 values, w3 needs 
+本次构建没有包含 CUDA 后端	This build does not include the CUDA backend
+CUDA 初始化失败	CUDA initialization failed
+CPU（本次构建未包含 CUDA 后端）	CPU (this build does not include the CUDA backend)
+CPU（未检测到可用的 CUDA 设备）	CPU (no usable CUDA device detected)
+CPU（已在界面上关闭 CUDA 加速）	CPU (CUDA acceleration is disabled in the UI)
+CUDA 设备	CUDA device
+（快速 float）	 (fast float)

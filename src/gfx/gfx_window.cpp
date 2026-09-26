@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "gfx_internal.h"
+#include "Lang.h"
 
 /* ---- wgl 扩展：3.3 core 上下文 ---- */
 #define WGL_CONTEXT_MAJOR_VERSION_ARB_X 0x2091
@@ -282,11 +283,11 @@ bool applyPixelFormat(HDC dc, bool onscreen, std::string* err) {
   pfd.cAlphaBits = 8;
   int pf = ChoosePixelFormat(dc, &pfd);
   if (pf == 0) {
-    if (err) *err = "ChoosePixelFormat 失败";
+    if (err) *err = core::tr("ChoosePixelFormat 失败", "ChoosePixelFormat failed");
     return false;
   }
   if (!SetPixelFormat(dc, pf, &pfd)) {
-    if (err) *err = "SetPixelFormat 失败";
+    if (err) *err = core::tr("SetPixelFormat 失败", "SetPixelFormat failed");
     return false;
   }
   return true;
@@ -296,12 +297,12 @@ bool applyPixelFormat(HDC dc, bool onscreen, std::string* err) {
 HGLRC createCoreContext(HDC dc, std::string* err) {
   HGLRC legacy = wglCreateContext(dc);
   if (legacy == nullptr) {
-    if (err) *err = "wglCreateContext 失败";
+    if (err) *err = core::tr("wglCreateContext 失败", "wglCreateContext failed");
     return nullptr;
   }
   if (!wglMakeCurrent(dc, legacy)) {
     wglDeleteContext(legacy);
-    if (err) *err = "wglMakeCurrent 失败";
+    if (err) *err = core::tr("wglMakeCurrent 失败", "wglMakeCurrent failed");
     return nullptr;
   }
   PFN_wglCreateContextAttribsARB createAttribs =
@@ -322,7 +323,7 @@ HGLRC createCoreContext(HDC dc, std::string* err) {
     if (!wglMakeCurrent(dc, core)) {
       wglDeleteContext(core);
       wglDeleteContext(legacy);
-      if (err) *err = "wglMakeCurrent(core) 失败";
+      if (err) *err = core::tr("wglMakeCurrent(core) 失败", "wglMakeCurrent(core) failed");
       return nullptr;
     }
     wglDeleteContext(legacy);
@@ -334,7 +335,7 @@ HGLRC createCoreContext(HDC dc, std::string* err) {
     return core;
   }
   /* 退路：显卡没给 3.3 core（很老的驱动）也要能用，版本由自检打印 */
-  if (err) *err = "wglCreateContextAttribsARB 未给出 3.3 core 上下文，已退回兼容上下文";
+  if (err) *err = core::tr("wglCreateContextAttribsARB 未给出 3.3 core 上下文，已退回兼容上下文", "wglCreateContextAttribsARB did not provide a 3.3 core context; falling back to a compatibility context");
   return legacy;
 }
 
@@ -358,19 +359,19 @@ bool createHiddenGL(int w, int h, HiddenGL* out, std::string* err) {
   dpiAwareOnce();
   HINSTANCE inst = GetModuleHandleW(nullptr);
   if (!registerClassOnce(inst)) {
-    if (err) *err = "RegisterClassExW 失败";
+    if (err) *err = core::tr("RegisterClassExW 失败", "RegisterClassExW failed");
     return false;
   }
   HWND hwnd = CreateWindowExW(0, kWindowClass, L"gfx-offscreen", WS_POPUP, 0, 0,
                               w > 0 ? w : 8, h > 0 ? h : 8, nullptr, nullptr, inst, nullptr);
   if (hwnd == nullptr) {
-    if (err) *err = "CreateWindowExW 失败（离屏窗口）";
+    if (err) *err = core::tr("CreateWindowExW 失败（离屏窗口）", "CreateWindowExW failed (offscreen window)");
     return false;
   }
   HDC dc = GetDC(hwnd);
   if (dc == nullptr) {
     DestroyWindow(hwnd);
-    if (err) *err = "GetDC 失败";
+    if (err) *err = core::tr("GetDC 失败", "GetDC failed");
     return false;
   }
   if (!applyPixelFormat(dc, false, err)) {
@@ -413,7 +414,7 @@ void destroyHiddenGL(HiddenGL* ctx) {
 
 bool attachCoreContext(HDC dc, HGLRC* outRc, std::string* err) {
   if (dc == nullptr || outRc == nullptr) {
-    if (err) *err = "attachCoreContext：参数为空";
+    if (err) *err = core::tr("attachCoreContext：参数为空", "attachCoreContext: null argument");
     return false;
   }
   /* 窗口可能已经设过像素格式（同一个 DC 只能设一次），已设就沿用 */
@@ -442,7 +443,7 @@ bool Window::create(const wchar_t* title, int w, int h, bool resizable, std::str
 
   HINSTANCE inst = GetModuleHandleW(nullptr);
   if (!registerClassOnce(inst)) {
-    s.err = "RegisterClassExW 失败";
+    s.err = core::tr("RegisterClassExW 失败", "RegisterClassExW failed");
     if (err) *err = s.err;
     return false;
   }
@@ -458,7 +459,7 @@ bool Window::create(const wchar_t* title, int w, int h, bool resizable, std::str
                               CW_USEDEFAULT, CW_USEDEFAULT, want.right - want.left,
                               want.bottom - want.top, nullptr, nullptr, inst, nullptr);
   if (hwnd == nullptr) {
-    s.err = "CreateWindowExW 失败";
+    s.err = core::tr("CreateWindowExW 失败", "CreateWindowExW failed");
     if (err) *err = s.err;
     return false;
   }
@@ -467,7 +468,7 @@ bool Window::create(const wchar_t* title, int w, int h, bool resizable, std::str
 
   HDC dc = GetDC(hwnd);
   if (dc == nullptr) {
-    s.err = "GetDC 失败";
+    s.err = core::tr("GetDC 失败", "GetDC failed");
     DestroyWindow(hwnd);
     if (err) *err = s.err;
     return false;

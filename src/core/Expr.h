@@ -55,8 +55,10 @@ struct FnDef {
   std::string note;
 };
 
-extern const std::vector<FnDef> FN_DEFS;
+extern std::vector<FnDef> FN_DEFS; /* 语言一变会重建，所以不是 const */
 extern const std::vector<std::string> CONST_NAMES;
+/* 按当前语言重建函数表（由 Lang 的钩子调用） */
+void rebuildFnDefs();
 
 /* ---------------- 对外接口 ---------------- */
 

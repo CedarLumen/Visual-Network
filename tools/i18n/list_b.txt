@@ -1,0 +1,102 @@
+# src/ui/draw_ui.cpp
+神经网络模拟引擎
+整图
+缩放 100%
+错误
+模块库
+运行循环
+一键整理
+完成框选
+示例网络
+查看神经元
+重新随机
+复制
+删除
+成组
+解组
+全选
+清空选择
+删除选中神经元
+返回画布
+点一下放入画布中央，参数在右侧调节
+每一步：输入函数给出输入，网络前向一次，输出函数给出判定，奖励函数给出得分；
+开着「更新权重」时这一步还会反向传播并按学习率更新。
+关闭
+暂停
+开始
+单步
+统计清零
+重置神经网络
+频率直接填
+步/秒
+频率高于每秒 
+ 步：每一拍都要重画热力图、曲线与面板，设得再快也只是不再等待，
+实际速度以循环状态里的单步耗时为准
+当前结构没有可训练的层（画布上没有自生成输入或目标输出元件）：
+「更新权重」不会起作用，循环只做前向推理
+按当前结构重新测试
+评估全部示例
+显卡加速：开
+显卡加速：关
+计算后端：
+识别正确 
+上一个示例
+下一个示例
+上一层
+下一层
+收起函数设置
+自定义函数
+恢复默认公式
+语法与函数表
+目标函数
+默认 sin(3*in(0))：目标输出奖励元件按它算出期望输出，网络去逼近它
+输入函数
+默认 px/255：直接用当前示例的原像素，也就是原来的手写数字输入
+输出函数
+默认 v：不改动网络输出
+奖励函数
+默认 score：判定正确得 1 分，判定错误得 0 分
+说明
+# src/ui/draw_canvas.cpp
+半成品模块 · 
+ 神经元
+ 内部 · 
+ 个神经元
+输入侧
+输出侧
+先点开「运行循环」跑一次前向
+画布上没有可运行的层
+开始循环后显示每一步的得分
+最近 
+ 步得分
+# src/main.cpp
+神经网络模拟引擎
+创建窗口失败：
+初始化 OpenGL 失败：
+# src/gfx/gfx_window.cpp
+ChoosePixelFormat 失败
+SetPixelFormat 失败
+wglCreateContext 失败
+wglMakeCurrent 失败
+wglMakeCurrent(core) 失败
+wglCreateContextAttribsARB 未给出 3.3 core 上下文，已退回兼容上下文
+RegisterClassExW 失败
+CreateWindowExW 失败（离屏窗口）
+GetDC 失败
+attachCoreContext：参数为空
+CreateWindowExW 失败
+# src/gfx/gfx_renderer.cpp
+glCreateShader 失败
+着色器编译失败：
+着色器程序链接失败：
+离屏 FBO 不完整（状态 
+GetDC 失败
+OpenGL 入口缺失 
+ 个：
+beginFrame：画布尺寸非法
+beginOffscreen：尺寸非法
+# src/gfx/gfx_png.cpp
+写文件失败（第 
+ 次）：
+writePng：尺寸或数据非法
+writePng：创建目录失败：

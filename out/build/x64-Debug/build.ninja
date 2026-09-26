@@ -81,6 +81,14 @@ build CMakeFiles\nne_core.dir\src\core\Lab.cpp.obj: CXX_COMPILER__nne_core_unsca
   TARGET_COMPILE_PDB = CMakeFiles\nne_core.dir\nne_core.pdb
   TARGET_PDB = nne_core.pdb
 
+build CMakeFiles\nne_core.dir\src\core\Lang.cpp.obj: CXX_COMPILER__nne_core_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core\Lang.cpp || cmake_object_order_depends_target_nne_core
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
+  INCLUDES = -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core
+  OBJECT_DIR = CMakeFiles\nne_core.dir
+  OBJECT_FILE_DIR = CMakeFiles\nne_core.dir\src\core
+  TARGET_COMPILE_PDB = CMakeFiles\nne_core.dir\nne_core.pdb
+  TARGET_PDB = nne_core.pdb
+
 build CMakeFiles\nne_core.dir\src\core\Library.cpp.obj: CXX_COMPILER__nne_core_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core\Library.cpp || cmake_object_order_depends_target_nne_core
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
   INCLUDES = -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core
@@ -90,6 +98,14 @@ build CMakeFiles\nne_core.dir\src\core\Library.cpp.obj: CXX_COMPILER__nne_core_u
   TARGET_PDB = nne_core.pdb
 
 build CMakeFiles\nne_core.dir\src\core\Model.cpp.obj: CXX_COMPILER__nne_core_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core\Model.cpp || cmake_object_order_depends_target_nne_core
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
+  INCLUDES = -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core
+  OBJECT_DIR = CMakeFiles\nne_core.dir
+  OBJECT_FILE_DIR = CMakeFiles\nne_core.dir\src\core
+  TARGET_COMPILE_PDB = CMakeFiles\nne_core.dir\nne_core.pdb
+  TARGET_PDB = nne_core.pdb
+
+build CMakeFiles\nne_core.dir\src\core\Names.cpp.obj: CXX_COMPILER__nne_core_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core\Names.cpp || cmake_object_order_depends_target_nne_core
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
   INCLUDES = -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core
   OBJECT_DIR = CMakeFiles\nne_core.dir
@@ -137,7 +153,7 @@ build CMakeFiles\nne_core.dir\src\core\Train.cpp.obj: CXX_COMPILER__nne_core_uns
 #############################################
 # Link the static library nne_core.lib
 
-build nne_core.lib: CXX_STATIC_LIBRARY_LINKER__nne_core_Debug CMakeFiles\nne_core.dir\src\core\Data.cpp.obj CMakeFiles\nne_core.dir\src\core\Engine.cpp.obj CMakeFiles\nne_core.dir\src\core\Expr.cpp.obj CMakeFiles\nne_core.dir\src\core\Lab.cpp.obj CMakeFiles\nne_core.dir\src\core\Library.cpp.obj CMakeFiles\nne_core.dir\src\core\Model.cpp.obj CMakeFiles\nne_core.dir\src\core\NetText.cpp.obj CMakeFiles\nne_core.dir\src\core\Ops.cpp.obj CMakeFiles\nne_core.dir\src\core\Theme.cpp.obj CMakeFiles\nne_core.dir\src\core\Train.cpp.obj
+build nne_core.lib: CXX_STATIC_LIBRARY_LINKER__nne_core_Debug CMakeFiles\nne_core.dir\src\core\Data.cpp.obj CMakeFiles\nne_core.dir\src\core\Engine.cpp.obj CMakeFiles\nne_core.dir\src\core\Expr.cpp.obj CMakeFiles\nne_core.dir\src\core\Lab.cpp.obj CMakeFiles\nne_core.dir\src\core\Lang.cpp.obj CMakeFiles\nne_core.dir\src\core\Library.cpp.obj CMakeFiles\nne_core.dir\src\core\Model.cpp.obj CMakeFiles\nne_core.dir\src\core\Names.cpp.obj CMakeFiles\nne_core.dir\src\core\NetText.cpp.obj CMakeFiles\nne_core.dir\src\core\Ops.cpp.obj CMakeFiles\nne_core.dir\src\core\Theme.cpp.obj CMakeFiles\nne_core.dir\src\core\Train.cpp.obj
   LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -MDd
   LINK_FLAGS = /machine:x64
   OBJECT_DIR = CMakeFiles\nne_core.dir
@@ -491,6 +507,15 @@ build CMakeFiles\nne_tests.dir\src\tests\test_graph.cpp.obj: CXX_COMPILER__nne_t
   TARGET_COMPILE_PDB = CMakeFiles\nne_tests.dir\
   TARGET_PDB = nne_tests.pdb
 
+build CMakeFiles\nne_tests.dir\src\tests\test_lang.cpp.obj: CXX_COMPILER__nne_tests_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\tests\test_lang.cpp || cmake_object_order_depends_target_nne_tests
+  DEFINES = -DNNE_SOURCE_DIR=\"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\"
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
+  INCLUDES = -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\tests -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\core -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\gpu -IC:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\gfx -external:I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\include" -external:I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\include\cccl" -external:W0
+  OBJECT_DIR = CMakeFiles\nne_tests.dir
+  OBJECT_FILE_DIR = CMakeFiles\nne_tests.dir\src\tests
+  TARGET_COMPILE_PDB = CMakeFiles\nne_tests.dir\
+  TARGET_PDB = nne_tests.pdb
+
 build CMakeFiles\nne_tests.dir\src\tests\test_loop.cpp.obj: CXX_COMPILER__nne_tests_unscanned_Debug C$:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\src\tests\test_loop.cpp || cmake_object_order_depends_target_nne_tests
   DEFINES = -DNNE_SOURCE_DIR=\"C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\"
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /utf-8 /W3
@@ -571,7 +596,7 @@ build CMakeFiles\nne_tests.dir\src\tests\test_util.cpp.obj: CXX_COMPILER__nne_te
 #############################################
 # Link the executable nne_tests.exe
 
-build nne_tests.exe: CXX_EXECUTABLE_LINKER__nne_tests_Debug CMakeFiles\nne_tests.dir\src\tests\json.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_expr.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_geom.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_gfx.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_gpu.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_graph.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_loop.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_main.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_mnist.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_model.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_ops.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_store.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_train.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_util.cpp.obj | nne_core.lib nne_gpu.lib nne_gfx.lib C$:\Program$ Files\NVIDIA$ GPU$ Computing$ Toolkit\CUDA\v13.2\lib\x64\cudart.lib nne_core.lib || nne_core.lib nne_gfx.lib nne_gpu.lib
+build nne_tests.exe: CXX_EXECUTABLE_LINKER__nne_tests_Debug CMakeFiles\nne_tests.dir\src\tests\json.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_expr.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_geom.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_gfx.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_gpu.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_graph.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_lang.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_loop.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_main.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_mnist.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_model.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_ops.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_store.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_train.cpp.obj CMakeFiles\nne_tests.dir\src\tests\test_util.cpp.obj | nne_core.lib nne_gpu.lib nne_gfx.lib C$:\Program$ Files\NVIDIA$ GPU$ Computing$ Toolkit\CUDA\v13.2\lib\x64\cudart.lib nne_core.lib || nne_core.lib nne_gfx.lib nne_gpu.lib
   FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -MDd
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = nne_core.lib  nne_gpu.lib  nne_gfx.lib  opengl32.lib  gdi32.lib  user32.lib  "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.2\lib\x64\cudart.lib"  nne_core.lib  cudadevrt.lib  cudart.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

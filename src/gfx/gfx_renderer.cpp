@@ -24,6 +24,7 @@
 
 #include "gfx_internal.h"
 #include "gfx_loader.h"
+#include "Lang.h"
 
 namespace gl = gfxgl;
 
@@ -110,7 +111,7 @@ const char* kFragSrc =
 GLuint compileShader(GLenum type, const char* src, std::string* err) {
   GLuint sh = gl::glCreateShader(type);
   if (sh == 0) {
-    if (err != nullptr) *err = "glCreateShader 失败";
+    if (err != nullptr) *err = core::tr("glCreateShader 失败", "glCreateShader failed");
     return 0;
   }
   gl::glShaderSource(sh, 1, &src, nullptr);
@@ -120,7 +121,7 @@ GLuint compileShader(GLenum type, const char* src, std::string* err) {
   if (ok == 0) {
     char log[1024] = {};
     gl::glGetShaderInfoLog(sh, sizeof(log) - 1, nullptr, log);
-    if (err != nullptr) *err = std::string("着色器编译失败：") + log;
+    if (err != nullptr) *err = std::string(core::tr("着色器编译失败：", "Shader compilation failed: ")) + log;
     gl::glDeleteShader(sh);
     return 0;
   }
@@ -151,7 +152,7 @@ GLuint buildProgram(std::string* err) {
   if (ok == 0) {
     char log[1024] = {};
     gl::glGetProgramInfoLog(prog, sizeof(log) - 1, nullptr, log);
-    if (err != nullptr) *err = std::string("着色器程序链接失败：") + log;
+    if (err != nullptr) *err = std::string(core::tr("着色器程序链接失败：", "Shader program link failed: ")) + log;
     gl::glDeleteProgram(prog);
     gl::glDeleteShader(vs);
     gl::glDeleteShader(fs);
@@ -226,7 +227,7 @@ bool Renderer::Impl::ensureFbo(int w, int h) {
   gl::glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fboTex, 0);
   GLenum st = gl::glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (st != GL_FRAMEBUFFER_COMPLETE) {
-    err = "离屏 FBO 不完整（状态 " + std::to_string(static_cast<int>(st)) + "）";
+    err = core::tr("离屏 FBO 不完整（状态 ", "Offscreen FBO incomplete (status ") + std::to_string(static_cast<int>(st)) + core::tr("）", ")");
     gl::glBindFramebuffer(GL_FRAMEBUFFER, 0);
     gl::glDeleteFramebuffers(1, &fbo);
     fbo = 0;
@@ -378,7 +379,7 @@ bool Renderer::init(void* hwnd, std::string* err) {
     p_->hwnd = static_cast<HWND>(hwnd);
     p_->dc = GetDC(p_->hwnd);
     if (p_->dc == nullptr) {
-      p_->err = "GetDC 失败";
+      p_->err = core::tr("GetDC 失败", "GetDC failed");
       if (err != nullptr) *err = p_->err;
       shutdown();
       return false;
@@ -394,7 +395,7 @@ bool Renderer::init(void* hwnd, std::string* err) {
   std::string missingList;
   const int missing = gl::load(&missingList);
   if (missing > 0) {
-    p_->err = "OpenGL 入口缺失 " + std::to_string(missing) + " 个：" + missingList;
+    p_->err = core::tr("OpenGL 入口缺失 ", "Missing ") + std::to_string(missing) + core::tr(" 个：", " OpenGL entries:") + missingList;
     if (err != nullptr) *err = p_->err;
     shutdown();
     return false;
@@ -502,7 +503,7 @@ bool Renderer::beginFrame(int w, int h, Color clear) {
     return false;
   }
   if (w <= 0 || h <= 0) {
-    p_->err = "beginFrame：画布尺寸非法";
+    p_->err = core::tr("beginFrame：画布尺寸非法", "beginFrame: invalid canvas size");
     return false;
   }
   p_->canvasW = w;
@@ -747,7 +748,7 @@ bool Renderer::beginOffscreen(int w, int h) {
     return false;
   }
   if (w <= 0 || h <= 0) {
-    p_->err = "beginOffscreen：尺寸非法";
+    p_->err = core::tr("beginOffscreen：尺寸非法", "beginOffscreen: invalid size");
     return false;
   }
   p_->useFbo = true;

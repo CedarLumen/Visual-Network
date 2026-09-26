@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "Types.h"
+#include "Lang.h"
 
 namespace core {
 
@@ -222,7 +223,7 @@ std::vector<Token> scan(const std::string& src) {
       const std::string text = src.substr(i, j - i);
       const double v = std::atof(text.c_str());
       if (!std::isfinite(v)) {
-        return badToken("数字写错了：" + text, static_cast<int>(i));
+        return badToken(tr("数字写错了：", "Bad number: ") + text, static_cast<int>(i));
       }
       t.k = TK_NUM;
       t.num = v;
@@ -257,7 +258,7 @@ std::vector<Token> scan(const std::string& src) {
       i = i + 1;
       continue;
     }
-    return badToken(std::string("不认识的字符「") + c + "」", static_cast<int>(i));
+    return badToken(std::string(tr("不认识的字符「", "Unknown character \"")) + c + tr("」", "\""), static_cast<int>(i));
   }
   Token end;
   end.k = TK_END;
@@ -309,7 +310,7 @@ class Parser {
       }
     }
     if (list.empty() && err.empty()) {
-      fail("表达式是空的");
+      fail(tr("表达式是空的", "The expression is empty."));
     }
     return list;
   }
@@ -339,7 +340,7 @@ class Parser {
       take();
       return true;
     }
-    fail("这里应该是「" + s + "」");
+    fail(tr("这里应该是「", "Expected \"") + s + tr("」", "\""));
     return false;
   }
 
@@ -349,14 +350,14 @@ class Parser {
       take();
       const Token nt = peek();
       if (nt.k != TK_ID) {
-        fail("let 后面要跟一个变量名");
+        fail(tr("let 后面要跟一个变量名", "'let' must be followed by a variable name"));
         return ExprNode();
       }
       take();
       if (isP("=")) {
         take();
       } else {
-        fail("let " + nt.s + " 后面应该是「=」");
+        fail("let " + nt.s + tr(" 后面应该是「=」", " should be followed by \"=\""));
         return ExprNode();
       }
       ExprNode n;
@@ -485,7 +486,7 @@ class Parser {
         take();
         const FnDef* f = findFn(t.s);
         if (f == nullptr) {
-          fail("没有名为 " + t.s + " 的函数");
+          fail(tr("没有名为 ", "No function named ") + t.s + tr(" 的函数", " exists"));
           return ExprNode();
         }
         std::vector<ExprNode> args;
@@ -504,8 +505,8 @@ class Parser {
           return ExprNode();
         }
         if (static_cast<int>(args.size()) != f->arity) {
-          fail("函数 " + t.s + " 需要 " + std::to_string(f->arity) + " 个参数，实际 " +
-               std::to_string(args.size()) + " 个");
+          fail(tr("函数 ", "Function ") + t.s + tr(" 需要 ", " requires ") + std::to_string(f->arity) + tr(" 个参数，实际 ", " arguments, got ") +
+               std::to_string(args.size()) + tr(" 个", "."));
           return ExprNode();
         }
         ExprNode n;
@@ -526,10 +527,10 @@ class Parser {
       return e;
     }
     if (t.k == TK_END) {
-      fail("表达式在这里就结束了，后面还缺内容");
+      fail(tr("表达式在这里就结束了，后面还缺内容", "The expression ends here; content after it is missing"));
       return ExprNode();
     }
-    fail("这里不认识「" + t.s + "」");
+    fail(tr("这里不认识「", "Variable ") + t.s + tr("」", "\""));
     return ExprNode();
   }
 
@@ -560,7 +561,7 @@ class St {
       return ctx_.get(name);
     }
     if (err.empty()) {
-      err = "没有名为 " + name + " 的变量";
+      err = tr("没有名为 ", "No function named ") + name + tr(" 的变量", " is not recognized");
     }
     return std::nan("");
   }
@@ -690,35 +691,47 @@ void Ctx::clear() {
 
 /* ---------------- 函数表 ---------------- */
 
-const std::vector<FnDef> FN_DEFS = {
-    {"abs", 1, "绝对值"},
-    {"sign", 1, "符号，负 -1 零 0 正 1"},
-    {"floor", 1, "向下取整"},
-    {"ceil", 1, "向上取整"},
-    {"round", 1, "四舍五入"},
-    {"sq", 1, "平方"},
-    {"sqrt", 1, "平方根"},
-    {"exp", 1, "e 的幂"},
-    {"log", 1, "自然对数"},
-    {"sin", 1, "正弦"},
-    {"cos", 1, "余弦"},
-    {"tan", 1, "正切"},
-    {"tanh", 1, "双曲正切，输出 -1 到 1"},
-    {"sigmoid", 1, "输出 0 到 1"},
-    {"relu", 1, "负值归零"},
-    {"min", 2, "较小值"},
-    {"max", 2, "较大值"},
-    {"pow", 2, "幂"},
-    {"mod", 2, "取余"},
-    {"clamp", 3, "clamp(值, 下限, 上限)"},
-    {"lerp", 3, "lerp(起点, 终点, 比例)"},
-    {"step", 2, "step(阈值, 值) 大于等于阈值取 1"},
-    {"smoothstep", 3, "smoothstep(下, 上, 值) 平滑过渡"},
-    {"if", 3, "if(条件, 真值, 假值)"},
-    {"rnd", 1, "按参数取 0 到 1 的固定随机数"},
-    {"noise", 2, "按两个参数取 -1 到 1 的固定噪声"},
-    {"in", 1, "in(k) 当前输入向量的第 k 个分量（从 0 数）"},
-};
+std::vector<FnDef> makeFnDefs() {
+  return {
+    {"abs", 1, tr("绝对值", "Absolute value")},
+    {"sign", 1, tr("符号，负 -1 零 0 正 1", "Sign: -1 for negative, 0 for zero, 1 for positive")},
+    {"floor", 1, tr("向下取整", "Floor")},
+    {"ceil", 1, tr("向上取整", "Ceiling")},
+    {"round", 1, tr("四舍五入", "Round")},
+    {"sq", 1, tr("平方", "Square")},
+    {"sqrt", 1, tr("平方根", "Square root")},
+    {"exp", 1, tr("e 的幂", "Exponential (e^x)")},
+    {"log", 1, tr("自然对数", "Natural logarithm")},
+    {"sin", 1, tr("正弦", "Sine")},
+    {"cos", 1, tr("余弦", "Cosine")},
+    {"tan", 1, tr("正切", "Tangent")},
+    {"tanh", 1, tr("双曲正切，输出 -1 到 1", "Hyperbolic tangent, outputs -1 to 1")},
+    {"sigmoid", 1, tr("输出 0 到 1", "Outputs 0 to 1")},
+    {"relu", 1, tr("负值归零", "Negative values become 0")},
+    {"min", 2, tr("较小值", "Minimum value")},
+    {"max", 2, tr("较大值", "Maximum value")},
+    {"pow", 2, tr("幂", "Power")},
+    {"mod", 2, tr("取余", "Modulo")},
+    {"clamp", 3, tr("clamp(值, 下限, 上限)", "clamp(value, lower bound, upper bound)")},
+    {"lerp", 3, tr("lerp(起点, 终点, 比例)", "lerp(start, end, ratio)")},
+    {"step", 2, tr("step(阈值, 值) 大于等于阈值取 1", "step(threshold, value); returns 1 when value >= threshold")},
+    {"smoothstep", 3, tr("smoothstep(下, 上, 值) 平滑过渡", "smoothstep(low, high, value); smooth transition")},
+    {"if", 3, tr("if(条件, 真值, 假值)", "if(condition, value if true, value if false)")},
+    {"rnd", 1, tr("按参数取 0 到 1 的固定随机数", "Fixed random number in [0, 1] computed from the argument")},
+    {"noise", 2, tr("按两个参数取 -1 到 1 的固定噪声", "Fixed noise in [-1, 1] computed from two arguments")},
+    {"in", 1, tr("in(k) 当前输入向量的第 k 个分量（从 0 数）", "in(k): the k-th component of the current input vector (0-based)")},
+  };
+}
+
+/*
+ * 函数表：表里的说明是文案，静态初始化时语言还没从存档读进来，
+ * 所以这里建一次、切语言时再重建（rebuildFnDefs 由 Lang 的钩子调）。
+ */
+std::vector<FnDef> FN_DEFS = makeFnDefs();
+
+void rebuildFnDefs() { FN_DEFS = makeFnDefs(); }
+
+const bool kLangHookFnDefs = (onLangChange(&rebuildFnDefs), true);
 
 const std::vector<std::string> CONST_NAMES = {"pi", "e"};
 
@@ -744,12 +757,12 @@ bool Prog::build() {
   }
   const Token& last = p.peek();
   if (last.k != TK_END) {
-    err = "多余的内容「" + last.s + "」";
+    err = tr("多余的内容「", "Unexpected extra content \"") + last.s + tr("」", "\"");
     ok = false;
     return false;
   }
   if (list.empty()) {
-    err = "表达式是空的";
+    err = tr("表达式是空的", "The expression is empty.");
     ok = false;
     return false;
   }
@@ -784,18 +797,18 @@ Prog compileProg(const std::string& src) {
 
 std::vector<std::string> docLang() {
   std::vector<std::string> out;
-  out.push_back("运算符：+ - * / %（取余）^（乘方，右结合）、( )、比较 < > <= >= == !=、" 
-                "逻辑 && || !、三目 条件 ? 甲 : 乙。");
-  out.push_back("语句：用分号或换行分成多条；let 名字 = 表达式 可以先算一个中间量；"
-                "最后一条表达式的值就是函数的返回值。");
-  out.push_back("常量：pi 圆周率、e 自然常数。比较与逻辑成立取 1，不成立取 0。");
+  out.push_back(tr("运算符：+ - * / %（取余）^（乘方，右结合）、( )、比较 < > <= >= == !=、" 
+                "逻辑 && || !、三目 条件 ? 甲 : 乙。", "Operators: + - * / % (modulo), ^ (power, right-associative), ( ), comparisons < > <= >= == !=, logic && || !, ternary condition ? a : b."));
+  out.push_back(tr("语句：用分号或换行分成多条；let 名字 = 表达式 可以先算一个中间量；"
+                "最后一条表达式的值就是函数的返回值。", "Statements: separate with semicolons or newlines; let name = expression precomputes an intermediate value; The value of the last expression is the function's return value."));
+  out.push_back(tr("常量：pi 圆周率、e 自然常数。比较与逻辑成立取 1，不成立取 0。", "Constants: pi (the circle constant) and e (Euler's number). Comparisons and logic yield 1 when true and 0 when false."));
   std::string line;
   for (size_t i = 0; i < FN_DEFS.size(); i++) {
     const FnDef& f = FN_DEFS[i];
-    line = line + (line.empty() ? "" : "；") + f.name + "(" + std::to_string(f.arity) + ") " +
+    line = line + (line.empty() ? "" : tr("；", "; ")) + f.name + "(" + std::to_string(f.arity) + ") " +
            f.note;
   }
-  out.push_back("函数：" + line + "。");
+  out.push_back(tr("函数：", "Functions:") + line + tr("。", "."));
   return out;
 }
 

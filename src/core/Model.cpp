@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include "Lang.h"
+#include "Names.h"
 
 namespace core {
 
@@ -64,27 +66,27 @@ bool neuronEditable(const NetModule& m) {
 
 std::string neuronLockNote(const NetModule& m) {
   if (m.type == MOD_INPUT) {
-    return "神经元个数由输入尺寸决定，请调整宽高";
+    return tr("神经元个数由输入尺寸决定，请调整宽高", "The number of neurons follows the input size; adjust width and height instead");
   }
   if (m.type == MOD_POOL) {
-    return "神经元个数跟随上游通道数";
+    return tr("神经元个数跟随上游通道数", "The number of neurons follows the upstream channel count");
   }
   if (m.type == MOD_FLAT) {
-    return "展平层不含可调神经元";
+    return tr("展平层不含可调神经元", "A flatten layer has no adjustable neurons");
   }
   if (m.type == MOD_CONV) {
-    return "每个神经元对应一个卷积核（输出通道）";
+    return tr("每个神经元对应一个卷积核（输出通道）", "One neuron per kernel (output channel)");
   }
   if (m.type == MOD_DENSE) {
-    return "每个神经元是一个隐藏单元";
+    return tr("每个神经元是一个隐藏单元", "Each neuron is one hidden unit");
   }
   if (m.type == MOD_RAND) {
-    return "每个神经元是一个自生成输入，个数可调，可重新随机";
+    return tr("每个神经元是一个自生成输入，个数可调，可重新随机", "Each neuron is one random input, the count is adjustable and can be rerolled");
   }
   if (m.type == MOD_TGT) {
-    return "每个神经元是一个输出，期望值由当前输入算出";
+    return tr("每个神经元是一个输出，期望值由当前输入算出", "Each neuron is one output whose expected value comes from the current input");
   }
-  return "每个神经元对应一个输出类别";
+  return tr("每个神经元对应一个输出类别", "One neuron per output class");
 }
 
 Grid neuronGrid(int n) {
@@ -598,19 +600,19 @@ std::vector<int> gReachable(const NetGraph& g, int startId) {
 std::vector<Issue> gIssues(const NetGraph& g) {
   std::vector<Issue> out;
   if (g.modules.empty()) {
-    out.push_back(Issue(2, "画布为空，请先添加模块"));
+    out.push_back(Issue(2, tr("画布为空，请先添加模块", "The canvas is empty; add a module first")));
     return out;
   }
   const int inId = gSingleInput(g);
   const int outId = gSingleOutput(g);
   if (inId < 0) {
-    out.push_back(Issue(2, "缺少输入端（输入层或自生成输入）"));
+    out.push_back(Issue(2, tr("缺少输入端（输入层或自生成输入）", "Missing input side (input layer or random input)")));
   }
   if (outId < 0) {
-    out.push_back(Issue(2, "缺少输出层"));
+    out.push_back(Issue(2, tr("缺少输出层", "Missing output layer")));
   }
   if (inId < 0) {
-    out.push_back(Issue(1, std::to_string(g.modules.size()) + " 个模块未接入数据流"));
+    out.push_back(Issue(1, std::to_string(g.modules.size()) + tr(" 个模块未接入数据流", " module(s) not connected to the data flow")));
   }
   if (inId >= 0) {
     const std::vector<int> reach = gReachable(g, inId);
@@ -627,7 +629,7 @@ std::vector<Issue> gIssues(const NetGraph& g) {
       }
     }
     if (orphan > 0) {
-      out.push_back(Issue(1, std::to_string(orphan) + " 个模块未接入数据流"));
+      out.push_back(Issue(1, std::to_string(orphan) + tr(" 个模块未接入数据流", " module(s) not connected to the data flow")));
     }
     if (outId >= 0) {
       bool outReached = false;
@@ -637,7 +639,7 @@ std::vector<Issue> gIssues(const NetGraph& g) {
         }
       }
       if (!outReached) {
-        out.push_back(Issue(2, "输出层未接入数据流"));
+        out.push_back(Issue(2, tr("输出层未接入数据流", "The output layer is not connected to the data flow")));
       }
     }
   }
@@ -647,13 +649,13 @@ std::vector<Issue> gIssues(const NetGraph& g) {
     const NetModule m = gGet(g, order[i]);
     if (m.type == MOD_CONV || m.type == MOD_POOL) {
       if (m.p.k < 1 || m.p.k > m.p.inH) {
-        out.push_back(Issue(2, m.name + "：窗口 " + std::to_string(m.p.k) + " 超过上游高度 " +
+        out.push_back(Issue(2, displayName(m.name) + tr("：窗口 ", ": window ") + std::to_string(m.p.k) + tr(" 超过上游高度 ", " exceeds the upstream height ") +
                                    std::to_string(m.p.inH)));
       }
     }
   }
   if (out.empty()) {
-    out.push_back(Issue(0, "结构完整"));
+    out.push_back(Issue(0, tr("结构完整", "Structure complete")));
   }
   return out;
 }
@@ -926,26 +928,26 @@ std::string modSummary(const NetModule& m) {
            std::to_string(m.p.inW);
   }
   if (m.type == MOD_CONV) {
-    return std::to_string(m.p.channels) + " 核" + std::to_string(m.p.k) + "×" +
+    return std::to_string(m.p.channels) + tr(" 核", " kernels of ") + std::to_string(m.p.k) + "×" +
            std::to_string(m.p.k) + "/" + std::to_string(m.p.stride);
   }
   if (m.type == MOD_POOL) {
-    return (m.p.poolMode == 0 ? std::string("最大") : std::string("平均")) + " " +
+    return (m.p.poolMode == 0 ? std::string(tr("最大", "max")) : std::string(tr("平均", "average"))) + " " +
            std::to_string(m.p.k) + "×" + std::to_string(m.p.k);
   }
   if (m.type == MOD_FLAT) {
-    return "一维化";
+    return tr("一维化", "flattened to 1D");
   }
   if (m.type == MOD_DENSE) {
-    return std::to_string(m.p.units) + " 单元";
+    return std::to_string(m.p.units) + tr(" 单元", " units");
   }
   if (m.type == MOD_RAND) {
-    return std::to_string(m.p.units) + " 个自生成输入 · 种子 " + std::to_string(m.p.seed);
+    return std::to_string(m.p.units) + tr(" 个自生成输入 · 种子 ", " random inputs · seed ") + std::to_string(m.p.seed);
   }
   if (m.type == MOD_TGT) {
-    return std::to_string(m.p.units) + " 个期望输出";
+    return std::to_string(m.p.units) + tr(" 个期望输出", " expected outputs");
   }
-  return std::to_string(m.p.units) + " 类";
+  return std::to_string(m.p.units) + tr(" 类", " classes");
 }
 
 void clampParams(NetModule& m) {

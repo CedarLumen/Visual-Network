@@ -17,6 +17,7 @@
 #include "gpu_backend.h"
 
 #include <algorithm>
+#include "Lang.h"
 
 namespace gpu {
 namespace {
@@ -157,7 +158,7 @@ bool init(std::string* err) {
   }
   if (g_table == nullptr) {
     g_cuOk = false;
-    g_lastErr = "本次构建没有包含 CUDA 后端";
+    g_lastErr = core::tr("本次构建没有包含 CUDA 后端", "This build does not include the CUDA backend");
     if (err != nullptr) {
       *err = g_lastErr;
     }
@@ -176,7 +177,7 @@ bool init(std::string* err) {
   }
   g_cuOk = okNow;
   if (!okNow) {
-    g_lastErr = buf[0] != '\0' ? std::string(buf) : std::string("CUDA 初始化失败");
+    g_lastErr = buf[0] != '\0' ? std::string(buf) : std::string(core::tr("CUDA 初始化失败", "CUDA initialization failed"));
     if (err != nullptr) {
       *err = g_lastErr;
     }
@@ -228,17 +229,17 @@ bool enabled() {
 std::string modeText() {
   ensureInit();
   if (g_table == nullptr) {
-    return "CPU（本次构建未包含 CUDA 后端）";
+    return core::tr("CPU（本次构建未包含 CUDA 后端）", "CPU (this build does not include the CUDA backend)");
   }
   if (!g_cuOk) {
-    return "CPU（未检测到可用的 CUDA 设备）";
+    return core::tr("CPU（未检测到可用的 CUDA 设备）", "CPU (no usable CUDA device detected)");
   }
   if (!g_enabled) {
-    return "CPU（已在界面上关闭 CUDA 加速）";
+    return core::tr("CPU（已在界面上关闭 CUDA 加速）", "CPU (CUDA acceleration is disabled in the UI)");
   }
-  const std::string base = "CUDA · " + (g_devName.empty() ? std::string("CUDA 设备") : g_devName);
+  const std::string base = "CUDA · " + (g_devName.empty() ? std::string(core::tr("CUDA 设备", "CUDA device")) : g_devName);
   if (g_precision == PRECISION_FAST) {
-    return base + "（快速 float）";
+    return base + core::tr("（快速 float）", " (fast float)");
   }
   return base;
 }

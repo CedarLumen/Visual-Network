@@ -16,6 +16,7 @@
 #include "Ops.h"
 #include "Theme.h"
 #include "app.h"
+#include "Lang.h"
 
 namespace ui {
 
@@ -214,8 +215,8 @@ void App::drawCanvasWorld(gfx::Renderer& r) {
     }
     p.fillRect(sx, sy, sw, sh, col::groupBg());
     p.strokeRect(sx, sy, sw, sh, sel ? 2.0f : 1.0f, sel ? col::sel() : col::groupLine());
-    p.text(sx + 8, sy + 12, "半成品模块 · " + graph_.groups[i].name, gfx::font(15),
-           col::groupText());
+    p.text(sx + PX(8), sy + PX(12), core::tr("半成品模块 · ", "Group · ") + core::displayName(graph_.groups[i].name),
+           gfx::font(FS_BODY), col::groupText());
   }
 
   /* 连线 */
@@ -317,12 +318,12 @@ void App::drawCanvasWorld(gfx::Renderer& r) {
     }
 
     /* 标题与尺寸 */
-    const gfx::Font titleFont = gfx::font(17, true);
-    const float titleX = sx + 7;
-    p.text(titleX, sy + static_cast<float>(18 * vp_.zoom), m.name, titleFont,
+    const gfx::Font titleFont = gfx::font(FS_BODY, true);
+    const float titleX = sx + PX(7);
+    p.text(titleX, sy + static_cast<float>(18 * vp_.zoom), core::displayName(m.name), titleFont,
            selected ? col::sel() : col::text());
-    p.text(sx + 7, sy + sh - static_cast<float>(10 * vp_.zoom), core::modSummary(m),
-           gfx::font(14), col::textDim());
+    p.text(sx + PX(7), sy + sh - static_cast<float>(10 * vp_.zoom), core::modSummary(m),
+           gfx::font(FS_TINY), col::textDim());
     /*
      * 右上角的「N 神经元」：GDI 量出来的宽度是准的，框窄时右对齐会贴到标题上（只隔 1px，
      * 看上去连成一个词），框里的模块名反而是必须看清的那条。原版用 s.length*size*0.62 粗估
@@ -330,11 +331,11 @@ void App::drawCanvasWorld(gfx::Renderer& r) {
      * 而这类信息在底部的尺寸行里都有对应（层类型、通道数）。
      */
     if (vp_.zoom > 0.6) {
-      const std::string cnt = std::to_string(count) + " 神经元";
-      const gfx::Font cntFont = gfx::font(14);
+      const std::string cnt = std::to_string(count) + core::tr(" 神经元", " neurons");
+      const gfx::Font cntFont = gfx::font(FS_TINY);
       const float cntW = p.textWidth(cnt, cntFont);
       const float cntX = sx + sw - 7 - cntW;
-      if (cntX - (titleX + p.textWidth(m.name, titleFont)) >= 4) {
+      if (cntX - (titleX + p.textWidth(core::displayName(m.name), titleFont)) >= 4) {
         p.text(cntX, sy + static_cast<float>(18 * vp_.zoom), cnt, cntFont, col::textFaint());
       }
     }
@@ -374,15 +375,15 @@ void App::drawInnerView(gfx::Renderer& r) {
     return;
   }
   const int count = core::neuronCountFor(m);
-  const float areaX = 90;
-  const float areaY = 54;
-  const float areaW = w - areaX - 30;
-  const float areaH = h - areaY - 60;
-  p.text(16, 20, m.name + " 内部 · " + std::to_string(count) + " 个神经元", gfx::font(15, true),
-         col::text());
-  p.text(16, 38, core::neuronLockNote(m), gfx::font(14), col::textDim());
-  p.text(16, areaY + areaH / 2 - 8, "输入侧", gfx::font(13), col::textFaint());
-  p.text(16, areaY + areaH / 2 + 8, "输出侧", gfx::font(13), col::textFaint());
+  const float areaX = PX(90);
+  const float areaY = PX(54);
+  const float areaW = w - areaX - PX(30);
+  const float areaH = h - areaY - PX(60);
+  p.text(PX(16), PX(16), core::displayName(m.name) + core::tr(" 内部 · ", " inside · ") + std::to_string(count) + core::tr(" 个神经元", " neurons"),
+         gfx::font(FS_BODY, true), col::text());
+  p.text(PX(16), PX(40), core::neuronLockNote(m), gfx::font(FS_SMALL), col::textDim());
+  p.text(PX(16), areaY + areaH / 2 - PX(14), core::tr("输入侧", "Input Side"), gfx::font(FS_TINY), col::textFaint());
+  p.text(PX(16), areaY + areaH / 2 + PX(2), core::tr("输出侧", "Output Side"), gfx::font(FS_TINY), col::textFaint());
 
   const core::Fit f = core::fitNeurons(count, areaW, areaH, 3);
   const gfx::Color col = typeColorOf(m.type);
@@ -425,11 +426,13 @@ void App::drawHeatmap(gfx::Renderer& r, const Rect& box) {
   Paint p(r, 0, 0);
   p.fillRect(box.x, box.y, box.w, box.h, col::canvas());
   if (!hasResult_) {
-    p.text(box.x + 8, box.cy() - 6, "先点「测试循环」跑一次前向", gfx::font(13), col::textFaint());
+    p.text(box.x + PX(8), box.cy() - FS_SMALL / 2, core::tr("先点开「运行循环」跑一次前向", "Open \"Run Loop\" and run one forward pass first"),
+           gfx::font(FS_SMALL), col::textFaint());
     return;
   }
   if (stepIdx_ < 0 || stepIdx_ >= static_cast<int>(result_.steps.size())) {
-    p.text(box.x + 8, box.cy() - 6, "画布上没有可运行的层", gfx::font(13), col::textFaint());
+    p.text(box.x + PX(8), box.cy() - FS_SMALL / 2, core::tr("画布上没有可运行的层", "No runnable layers on the canvas"), gfx::font(FS_SMALL),
+           col::textFaint());
     return;
   }
   const core::Step& st = result_.steps[stepIdx_];
@@ -485,7 +488,8 @@ void App::drawCurve(gfx::Renderer& r, const Rect& box) {
   Paint p(r, 0, 0);
   p.fillRect(box.x, box.y, box.w, box.h, col::canvas());
   if (curve_.size() < 2) {
-    p.text(box.x + 8, box.cy() - 6, "开始循环后显示每一步的得分", gfx::font(13), col::textFaint());
+    p.text(box.x + PX(8), box.cy() - FS_SMALL / 2, core::tr("开始循环后显示每一步的得分", "Per-step scores appear once the loop starts"),
+           gfx::font(FS_SMALL), col::textFaint());
     return;
   }
   double lo = curve_[0];
@@ -513,8 +517,8 @@ void App::drawCurve(gfx::Renderer& r, const Rect& box) {
     pts.push_back(box.y + box.h - static_cast<float>((curve_[i] - lo) / (hi - lo) * box.h));
   }
   p.polyline(pts.data(), n, 2, col::ok());
-  p.text(box.x + 6, box.y + 4, "最近 " + std::to_string(n) + " 步得分", gfx::font(13),
-         col::textFaint());
+  p.text(box.x + PX(6), box.y + PX(4), core::tr("最近 ", "Score of last ") + std::to_string(n) + core::tr(" 步得分", " steps"),
+         gfx::font(FS_SMALL), col::textFaint());
 }
 
 void App::drawPreview(gfx::Renderer& r, const Rect& box) {

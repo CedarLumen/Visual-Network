@@ -33,6 +33,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "Lang.h"
+#include "Names.h"
 
 namespace gpu {
 namespace {
@@ -50,7 +52,7 @@ const core::NetGraph& exampleRef() {
 
 std::string modText(const core::NetModule& m) {
   const std::string tn = core::modTypeName(m.type);
-  return m.name.empty() ? tn : (m.name + "（" + tn + "）");
+  return m.name.empty() ? tn : (core::displayName(m.name) + core::tr("（", " (") + tn + core::tr("）", ")"));
 }
 
 bool sameParams(const core::NetModule& a, const core::NetModule& b) {
@@ -76,12 +78,12 @@ bool checkStructure(const core::NetGraph& g, int h, int w2, std::vector<core::Ne
   const std::vector<int> ro = core::gOrder(ref);
   const std::vector<int> go = core::gOrder(g);
   if (go.empty()) {
-    *why = "画布是空的，没有可评估的网络";
+    *why = core::tr("画布是空的，没有可评估的网络", "The canvas is empty; there is no network to evaluate");
     return false;
   }
   if (go.size() != ro.size()) {
     char buf[160];
-    std::snprintf(buf, sizeof(buf), "图里有 %d 个模块，示例网络是 %d 个，批量评估只认示例网络结构",
+    std::snprintf(buf, sizeof(buf), core::tr("图里有 %d 个模块，示例网络是 %d 个，批量评估只认示例网络结构", "The graph has %d modules but the example network has %d; batch evaluation only accepts the example network structure"),
                   static_cast<int>(go.size()), static_cast<int>(ro.size()));
     *why = buf;
     return false;
@@ -91,8 +93,8 @@ bool checkStructure(const core::NetGraph& g, int h, int w2, std::vector<core::Ne
     const core::NetModule m = core::gGet(g, go[i]);
     const core::NetModule r = core::gGet(ref, ro[i]);
     if (!sameParams(m, r)) {
-      *why = "第 " + std::to_string(i) + " 个模块「" + modText(m) + "」与示例网络的「" +
-             modText(r) + "」参数不一致，批量评估只认示例网络结构";
+      *why = core::tr("第 ", "Module ") + std::to_string(i) + core::tr(" 个模块「", " \"") + modText(m) + core::tr("」与示例网络的「", "\" differs from the example network's \"") +
+             modText(r) + core::tr("」参数不一致，批量评估只认示例网络结构", "\" in its parameters; batch evaluation only accepts the example network structure");
       return false;
     }
     mods->push_back(m);
@@ -100,28 +102,28 @@ bool checkStructure(const core::NetGraph& g, int h, int w2, std::vector<core::Ne
   /* 必须是一条链：每个模块的上游就是执行顺序里的前一个，最后一层没有下游 */
   for (size_t i = 1; i < go.size(); i++) {
     if (core::gPrevOf(g, go[i]) != go[i - 1]) {
-      *why = "模块「" + modText((*mods)[i]) + "」的上游不是执行顺序里的前一层，这条链接得不对";
+      *why = core::tr("模块「", "Module \"") + modText((*mods)[i]) + core::tr("」的上游不是执行顺序里的前一层，这条链接得不对", "\" has an upstream that is not the previous layer in execution order; this connection is wrong");
       return false;
     }
   }
   for (size_t i = 0; i + 1 < go.size(); i++) {
     if (core::gNextOf(g, go[i]) != go[i + 1]) {
-      *why = "模块「" + modText((*mods)[i]) + "」的下游不是执行顺序里的后一层，这条链接得不对";
+      *why = core::tr("模块「", "Module \"") + modText((*mods)[i]) + core::tr("」的下游不是执行顺序里的后一层，这条链接得不对", "\" has a downstream that is not the next layer in execution order; this connection is wrong");
       return false;
     }
   }
   const core::NetModule in = (*mods)[0];
   if (in.type != core::MOD_INPUT) {
-    *why = "第一层不是输入层，批量评估只认示例网络结构";
+    *why = core::tr("第一层不是输入层，批量评估只认示例网络结构", "The first layer is not the input layer; batch evaluation only accepts the example network structure");
     return false;
   }
   if (in.p.inC != 1) {
-    *why = "输入层通道数是 " + std::to_string(in.p.inC) + "，批量评估按灰度单通道图拼接";
+    *why = core::tr("输入层通道数是 ", "The input layer has ") + std::to_string(in.p.inC) + core::tr("，批量评估按灰度单通道图拼接", " channels; batch evaluation concatenates grayscale single-channel images");
     return false;
   }
   if (in.p.inH != h || in.p.inW != w2) {
-    *why = "输入层尺寸 " + core::shapeText3(in.p.inC, in.p.inH, in.p.inW) + " 与调用方给的 " +
-           std::to_string(h) + "×" + std::to_string(w2) + " 对不上";
+    *why = core::tr("输入层尺寸 ", "The input layer size ") + core::shapeText3(in.p.inC, in.p.inH, in.p.inW) + core::tr(" 与调用方给的 ", " does not match the ") +
+           std::to_string(h) + "×" + std::to_string(w2) + core::tr(" 对不上", " given by the caller");
     return false;
   }
   return true;
@@ -151,29 +153,29 @@ bool buildPipeline(const std::vector<core::NetModule>& m, int n, int h, int w2, 
   p->oh1 = core::convOutSize(h, c1.p.k, c1.p.stride, c1.p.pad);
   p->ow1 = core::convOutSize(w2, c1.p.k, c1.p.stride, c1.p.pad);
   if (p->oh1 <= 0 || p->ow1 <= 0) {
-    *why = "卷积 1 算不出输出（输入 " + std::to_string(h) + "×" + std::to_string(w2) +
-           " 小于核 " + std::to_string(c1.p.k) + "×" + std::to_string(c1.p.k) + "）";
+    *why = core::tr("卷积 1 算不出输出（输入 ", "Convolution 1 cannot produce output (input ") + std::to_string(h) + "×" + std::to_string(w2) +
+           core::tr(" 小于核 ", " is smaller than the kernel ") + std::to_string(c1.p.k) + "×" + std::to_string(c1.p.k) + core::tr("）", ")");
     return false;
   }
   p->ph1 = core::poolOutSize(p->oh1, p1.p.k, p1.p.stride);
   p->pw1 = core::poolOutSize(p->ow1, p1.p.k, p1.p.stride);
   if (p->ph1 <= 0 || p->pw1 <= 0) {
-    *why = "池化 1 算不出输出（卷积 1 输出 " + std::to_string(p->oh1) + "×" +
-           std::to_string(p->ow1) + " 小于窗口）";
+    *why = core::tr("池化 1 算不出输出（卷积 1 输出 ", "Pooling 1 cannot produce output (convolution 1 output ") + std::to_string(p->oh1) + "×" +
+           std::to_string(p->ow1) + core::tr(" 小于窗口）", " is smaller than the window)");
     return false;
   }
   p->oh2 = core::convOutSize(p->ph1, c2.p.k, c2.p.stride, c2.p.pad);
   p->ow2 = core::convOutSize(p->pw1, c2.p.k, c2.p.stride, c2.p.pad);
   if (p->oh2 <= 0 || p->ow2 <= 0) {
-    *why = "卷积 2 算不出输出（池化 1 输出 " + std::to_string(p->ph1) + "×" +
-           std::to_string(p->pw1) + " 小于核）";
+    *why = core::tr("卷积 2 算不出输出（池化 1 输出 ", "Convolution 2 cannot produce output (pooling 1 output ") + std::to_string(p->ph1) + "×" +
+           std::to_string(p->pw1) + core::tr(" 小于核）", " is smaller than the kernel)");
     return false;
   }
   p->ph2 = core::poolOutSize(p->oh2, p2.p.k, p2.p.stride);
   p->pw2 = core::poolOutSize(p->ow2, p2.p.k, p2.p.stride);
   if (p->ph2 <= 0 || p->pw2 <= 0) {
-    *why = "池化 2 算不出输出（卷积 2 输出 " + std::to_string(p->oh2) + "×" +
-           std::to_string(p->ow2) + " 小于窗口）";
+    *why = core::tr("池化 2 算不出输出（卷积 2 输出 ", "Pooling 2 cannot produce output (convolution 2 output ") + std::to_string(p->oh2) + "×" +
+           std::to_string(p->ow2) + core::tr(" 小于窗口）", " is smaller than the window)");
     return false;
   }
   p->flat = c2.p.channels * p->ph2 * p->pw2;
@@ -184,8 +186,8 @@ bool weightFits(long long got, long long need, const char* what, std::string* wh
   if (got == need) {
     return true;
   }
-  *why = std::string("权重形状对不上：") + what + " 需要 " + std::to_string(need) + " 个，实际 " +
-         std::to_string(got) + " 个";
+  *why = std::string(core::tr("权重形状对不上：", "Weight shape mismatch: ")) + what + core::tr(" 需要 ", " requires ") + std::to_string(need) + core::tr(" 个，实际 ", " but got ") +
+         std::to_string(got) + core::tr(" 个", ".");
   return false;
 }
 
@@ -198,28 +200,28 @@ bool checkWeights(const std::vector<core::NetModule>& m, const core::Weights& w,
   const int k2 = m[3].p.k;
   const int units = m[6].p.units;
   if (!w.ready()) {
-    *why = "没有可用的预训练权重（w1/b1/w3 至少有一组是空的）";
+    *why = core::tr("没有可用的预训练权重（w1/b1/w3 至少有一组是空的）", "No pretrained weights available (at least one of w1/b1/w3 is empty)");
     return false;
   }
   if (!weightFits(static_cast<long long>(w.w1.size()), static_cast<long long>(oc1) * ic * k1 * k1,
-                  "卷积 1 的核 w1", why)) {
+                  core::tr("卷积 1 的核 w1", "Convolution 1 kernel w1"), why)) {
     return false;
   }
-  if (!weightFits(static_cast<long long>(w.b1.size()), oc1, "卷积 1 的偏置 b1", why)) {
+  if (!weightFits(static_cast<long long>(w.b1.size()), oc1, core::tr("卷积 1 的偏置 b1", "Convolution 1 bias b1"), why)) {
     return false;
   }
   if (!weightFits(static_cast<long long>(w.w2.size()),
-                  static_cast<long long>(oc2) * oc1 * k2 * k2, "卷积 2 的核 w2", why)) {
+                  static_cast<long long>(oc2) * oc1 * k2 * k2, core::tr("卷积 2 的核 w2", "Convolution 2 kernel w2"), why)) {
     return false;
   }
-  if (!weightFits(static_cast<long long>(w.b2.size()), oc2, "卷积 2 的偏置 b2", why)) {
+  if (!weightFits(static_cast<long long>(w.b2.size()), oc2, core::tr("卷积 2 的偏置 b2", "Convolution 2 bias b2"), why)) {
     return false;
   }
   if (!weightFits(static_cast<long long>(w.w3.size()),
-                  static_cast<long long>(units) * p.flat, "全连接的权重 w3", why)) {
+                  static_cast<long long>(units) * p.flat, core::tr("全连接的权重 w3", "Dense weights w3"), why)) {
     return false;
   }
-  if (!weightFits(static_cast<long long>(w.b3.size()), units, "全连接的偏置 b3", why)) {
+  if (!weightFits(static_cast<long long>(w.b3.size()), units, core::tr("全连接的偏置 b3", "Dense bias b3"), why)) {
     return false;
   }
   return true;
@@ -234,23 +236,23 @@ EvalBatch evalExampleBatch(const core::NetGraph& g, const core::Weights& w,
   out.backend = modeText();
 
   if (count <= 0) {
-    out.why = "样本数为 " + std::to_string(count) + "，没有可评估的样本";
+    out.why = core::tr("样本数为 ", "Sample count is ") + std::to_string(count) + core::tr("，没有可评估的样本", "; there are no samples to evaluate");
     return out;
   }
   if (h <= 0 || w2 <= 0) {
-    out.why = "图像尺寸不对：" + std::to_string(h) + "×" + std::to_string(w2);
+    out.why = core::tr("图像尺寸不对：", "Wrong image size: ") + std::to_string(h) + "×" + std::to_string(w2);
     return out;
   }
   if (!(pixelScale > 0)) {
-    out.why = "像素缩放系数必须大于 0（实际 " + std::to_string(pixelScale) + "）";
+    out.why = core::tr("像素缩放系数必须大于 0（实际 ", "The pixel scale factor must be greater than 0 (actual ") + std::to_string(pixelScale) + core::tr("）", ")");
     return out;
   }
   const size_t plane = static_cast<size_t>(h) * static_cast<size_t>(w2);
   const size_t need = plane * static_cast<size_t>(count);
   if (gray.size() < need) {
-    out.why = "像素数据不够：需要 " + std::to_string(count) + "×" + std::to_string(h) + "×" +
-              std::to_string(w2) + " = " + std::to_string(need) + " 个，实际 " +
-              std::to_string(gray.size()) + " 个";
+    out.why = core::tr("像素数据不够：需要 ", "Not enough pixel data: need ") + std::to_string(count) + "×" + std::to_string(h) + "×" +
+              std::to_string(w2) + " = " + std::to_string(need) + core::tr(" 个，实际 ", " but got ") +
+              std::to_string(gray.size()) + core::tr(" 个", ".");
     return out;
   }
 
@@ -284,8 +286,8 @@ EvalBatch evalExampleBatch(const core::NetGraph& g, const core::Weights& w,
   /* 每样本的产物长度从产出张量本身算（y.c / n），不读池化层的 p.channels */
   const int lanes1 = (n > 0) ? y1.c / n * y1.h * y1.w : 0;
   if (y1.c % n != 0 || lanes1 != oc1 * p.oh1 * p.ow1) {
-    out.why = "卷积 1 的产出形状不对（通道 " + std::to_string(y1.c) + "，样本数 " +
-              std::to_string(n) + "）";
+    out.why = core::tr("卷积 1 的产出形状不对（通道 ", "Convolution 1 output shape is wrong (channels ") + std::to_string(y1.c) + core::tr("，样本数 ", ", samples ") +
+              std::to_string(n) + core::tr("）", ")");
     return out;
   }
   std::vector<double> a1 = actBatch(y1.d, n, lanes1, core::ACT_RELU);
@@ -295,8 +297,8 @@ EvalBatch evalExampleBatch(const core::NetGraph& g, const core::Weights& w,
   const core::T3 y3 = convBatch(y2, n, oc2, w.w2, w.b2, m[3].p.k, m[3].p.stride, m[3].p.pad);
   const int lanes2 = (n > 0) ? y3.c / n * y3.h * y3.w : 0;
   if (y3.c % n != 0 || lanes2 != oc2 * p.oh2 * p.ow2) {
-    out.why = "卷积 2 的产出形状不对（通道 " + std::to_string(y3.c) + "，样本数 " +
-              std::to_string(n) + "）";
+    out.why = core::tr("卷积 2 的产出形状不对（通道 ", "Convolution 2 output shape is wrong (channels ") + std::to_string(y3.c) + core::tr("，样本数 ", ", samples ") +
+              std::to_string(n) + core::tr("）", ")");
     return out;
   }
   std::vector<double> a2 = actBatch(y3.d, n, lanes2, core::ACT_RELU);
@@ -306,9 +308,9 @@ EvalBatch evalExampleBatch(const core::NetGraph& g, const core::Weights& w,
   /* 展平宽度 = 上游卷积层的实际通道数 × 池化后的高 × 宽 */
   const int per = (n > 0) ? y4.c / n * y4.h * y4.w : 0;
   if (y4.c % n != 0 || per != p.flat || per <= 0) {
-    out.why = "展平宽度与权重对不上：池化 2 输出 " + std::to_string(y4.c) + " 通道、" +
-              std::to_string(y4.h) + "×" + std::to_string(y4.w) + "，每样本 " +
-              std::to_string(per) + " 个值，w3 需要 " + std::to_string(w.w3.size()) + " 个";
+    out.why = core::tr("展平宽度与权重对不上：池化 2 输出 ", "Flattened width does not match the weights: pooling 2 output ") + std::to_string(y4.c) + core::tr(" 通道、", " channels, ") +
+              std::to_string(y4.h) + "×" + std::to_string(y4.w) + core::tr("，每样本 ", ", per sample ") +
+              std::to_string(per) + core::tr(" 个值，w3 需要 ", " values, w3 needs ") + std::to_string(w.w3.size()) + core::tr(" 个", ".");
     return out;
   }
   std::vector<double> flat(static_cast<size_t>(n) * per);

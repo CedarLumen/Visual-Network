@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "Lang.h"
+
 namespace core {
 
 /* 模块类型 */
@@ -94,19 +96,19 @@ inline std::string actName(int a) {
   if (a == ACT_SIGMOID) return "Sigmoid";
   if (a == ACT_TANH) return "Tanh";
   if (a == ACT_SOFTMAX) return "Softmax";
-  return "线性";
+  return tr("线性", "Linear");
 }
 
 inline std::string modTypeName(int t) {
-  if (t == MOD_INPUT) return "输入层";
-  if (t == MOD_CONV) return "卷积层";
-  if (t == MOD_POOL) return "池化层";
-  if (t == MOD_FLAT) return "展平层";
-  if (t == MOD_DENSE) return "全连接层";
+  if (t == MOD_INPUT) return tr("输入层", "Input Layer");
+  if (t == MOD_CONV) return tr("卷积层", "Convolution Layer");
+  if (t == MOD_POOL) return tr("池化层", "Pooling Layer");
+  if (t == MOD_FLAT) return tr("展平层", "Flatten Layer");
+  if (t == MOD_DENSE) return tr("全连接层", "Dense Layer");
   /* 下面两个必须与 Library 放模块时用的名字一致：名字不落盘，恢复时按类型重算 */
-  if (t == MOD_RAND) return "自生成输入";
-  if (t == MOD_TGT) return "目标输出奖励";
-  return "输出层";
+  if (t == MOD_RAND) return tr("自生成输入", "Random Input");
+  if (t == MOD_TGT) return tr("目标输出奖励", "Target Reward");
+  return tr("输出层", "Output Layer");
 }
 
 /* 三维特征图：[通道, 高, 宽]，数据按通道优先展开 */

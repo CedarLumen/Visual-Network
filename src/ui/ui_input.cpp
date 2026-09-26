@@ -17,6 +17,7 @@
 #include <cstdio>
 
 #include "app.h"
+#include "Lang.h"
 
 namespace ui {
 
@@ -105,7 +106,7 @@ void App::handleEvent(const gfx::Event& e) {
       if (panel_ != PANEL_NONE && panel_ != PANEL_INNER) {
         /* 点面板以外的区域即关闭（这一下不落到下面的按钮上） */
         panel_ = PANEL_NONE;
-        noteText_ = "已关闭面板";
+        noteText_ = core::tr("已关闭面板", "Panel closed");
         return;
       }
       handleCanvasDown(lx, ly);
@@ -200,7 +201,7 @@ void App::handleEvent(const gfx::Event& e) {
       if (e.vk == 27) { /* Esc */
         if (linkFrom_ >= 0) {
           linkFrom_ = -1;
-          noteText_ = "已取消连线";
+          noteText_ = core::tr("已取消连线", "Link cancelled");
         } else if (panel_ != PANEL_NONE) {
           panel_ = PANEL_NONE;
         } else if (!sel_.empty()) {
@@ -223,7 +224,7 @@ void App::handleEvent(const gfx::Event& e) {
         }
       } else if (e.vk == 70) { /* F：整图 */
         fitAll();
-        noteText_ = "已让整张图进入视野";
+        noteText_ = core::tr("已让整张图进入视野", "Fitted the whole graph into view");
       } else if (e.vk == 48) { /* 0：回到 100% */
         vp_.zoomAt(1.0 / vp_.zoom, cr.w / 2, cr.h / 2, cr.w, cr.h, core::LIM_ZOOM_MIN,
                    core::LIM_ZOOM_MAX);
@@ -380,7 +381,7 @@ void App::handleCanvasDown(float sx, float sy) {
     const int pid = port > 0 ? port : -port;
     if (linkFrom_ == pid) {
       linkFrom_ = -1;
-      noteText_ = "已取消连线";
+      noteText_ = core::tr("已取消连线", "Link cancelled");
     } else {
       linkFrom_ = pid;
       linkRight_ = port > 0;
@@ -439,7 +440,7 @@ void App::handleCanvasUp(float sx, float sy) {
     if (dragMoved_ && target >= 0 && target != linkFrom_) {
       completeLink(target);
     } else if (linkFrom_ >= 0) {
-      noteText_ = "起点已选，点目标模块完成连线";
+      noteText_ = core::tr("起点已选，点目标模块完成连线", "Start point selected, click the target module to finish the link");
       refreshTexts();
     }
     linkCand_ = -1;
@@ -481,13 +482,13 @@ void App::handleCanvasUp(float sx, float sy) {
     }
     /* 松手即完成框选：直接退出框选模式，不用再点「完成框选」 */
     multiMode_ = false;
-    noteText_ = "已选 " + std::to_string(sel_.size()) + " 个模块";
+    noteText_ = core::tr("已选 ", "Selected ") + std::to_string(sel_.size()) + core::tr(" 个模块", " modules");
   } else if (dragMode_ == DRAG_NEURON) {
     marqueeNeuronsSelect(dragStartX_, dragStartY_, sx, sy);
   } else if (dragMode_ == DRAG_MODULES) {
     snapSelection();
     if (sel_.size() > 1) {
-      noteText_ = "已整体移动 " + std::to_string(sel_.size()) + " 个模块";
+      noteText_ = core::tr("已整体移动 ", "Moved ") + std::to_string(sel_.size()) + core::tr(" 个模块", " modules");
     }
   }
   dragMode_ = DRAG_NONE;
@@ -503,10 +504,10 @@ void App::marqueeNeuronsSelect(float x0, float y0, float x1, float y1) {
   if (m.id < 0) {
     return;
   }
-  const float areaX = 90;
-  const float areaY = 54;
-  const float areaW = static_cast<float>(cvW()) - areaX - 30;
-  const float areaH = static_cast<float>(cvH()) - areaY - 60;
+  const float areaX = PX(90);
+  const float areaY = PX(54);
+  const float areaW = static_cast<float>(cvW()) - areaX - PX(30);
+  const float areaH = static_cast<float>(cvH()) - areaY - PX(60);
   innerSel_ = core::marqueeNeurons(core::neuronCountFor(m), x0 - areaX, y0 - areaY, x1 - areaX,
                                    y1 - areaY, areaW, areaH, 3);
   refreshInnerText();
@@ -518,10 +519,10 @@ void App::handleTap(float sx, float sy) {
     if (m.id < 0) {
       return;
     }
-    const float areaX = 90;
-    const float areaY = 54;
-    const float areaW = static_cast<float>(cvW()) - areaX - 30;
-    const float areaH = static_cast<float>(cvH()) - areaY - 60;
+    const float areaX = PX(90);
+    const float areaY = PX(54);
+    const float areaW = static_cast<float>(cvW()) - areaX - PX(30);
+    const float areaH = static_cast<float>(cvH()) - areaY - PX(60);
     const int idx =
         core::pickNeuron(core::neuronCountFor(m), sx - areaX, sy - areaY, areaW, areaH, 3);
     if (idx >= 0) {
@@ -553,11 +554,11 @@ void App::handleTap(float sx, float sy) {
     const int pid = port > 0 ? port : -port;
     if (linkFrom_ == pid) {
       linkFrom_ = -1;
-      noteText_ = "已取消连线";
+      noteText_ = core::tr("已取消连线", "Link cancelled");
     } else {
       linkFrom_ = pid;
       linkRight_ = port > 0;
-      noteText_ = "起点已选，点目标模块完成连线";
+      noteText_ = core::tr("起点已选，点目标模块完成连线", "Start point selected, click the target module to finish the link");
     }
     refreshTexts();
     return;
@@ -569,7 +570,7 @@ void App::handleTap(float sx, float sy) {
       completeLink(hit);
     } else if (hit < 0) {
       linkFrom_ = -1;
-      noteText_ = "已取消连线";
+      noteText_ = core::tr("已取消连线", "Link cancelled");
     }
     return;
   }
@@ -621,7 +622,7 @@ void App::handleTap(float sx, float sy) {
   /* 点空白：退出框选模式，或取消选择 */
   if (multiMode_) {
     multiMode_ = false;
-    noteText_ = "已退出框选模式";
+    noteText_ = core::tr("已退出框选模式", "Marquee select mode exited");
   } else if (!ctrl_) {
     sel_.clear();
   }
@@ -633,7 +634,8 @@ void App::completeLink(int target) {
   const int to = linkRight_ ? target : linkFrom_;
   core::gLink(graph_, from, to);
   linkFrom_ = -1;
-  noteText_ = "已连线 " + core::gGet(graph_, from).name + " → " + core::gGet(graph_, to).name;
+  noteText_ = core::tr("已连线 ", "Linked ") + core::displayName(core::gGet(graph_, from).name) + " → " +
+      core::displayName(core::gGet(graph_, to).name);
   afterChange();
 }
 

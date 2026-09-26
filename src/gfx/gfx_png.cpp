@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <filesystem>
+#include "Lang.h"
 
 namespace gfx {
 namespace detail {
@@ -128,7 +129,7 @@ bool writeFileRetry(const std::string& path, const std::vector<unsigned char>& b
       f.close();
     }
     if (err != nullptr) {
-      *err = "写文件失败（第 " + std::to_string(attempt) + " 次）：" + path;
+      *err = core::tr("写文件失败（第 ", "Failed to write file (attempt ") + std::to_string(attempt) + core::tr(" 次）：", "): ") + path;
     }
     Sleep(120 * static_cast<DWORD>(attempt)); /* OneDrive 偶尔锁文件，等一会儿再来 */
   }
@@ -160,13 +161,13 @@ bool ensureParentDir(const std::string& path) {
 bool writePng(const std::string& path, int w, int h, const unsigned char* rgba, std::string* err) {
   if (w <= 0 || h <= 0 || rgba == nullptr) {
     if (err != nullptr) {
-      *err = "writePng：尺寸或数据非法";
+      *err = core::tr("writePng：尺寸或数据非法", "writePng: invalid size or data");
     }
     return false;
   }
   if (!ensureParentDir(path)) {
     if (err != nullptr) {
-      *err = "writePng：创建目录失败：" + path;
+      *err = core::tr("writePng：创建目录失败：", "writePng: failed to create directory: ") + path;
     }
     return false;
   }

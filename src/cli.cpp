@@ -113,6 +113,21 @@ bool has(const std::string& hay, const std::string& needle) {
   return hay.find(needle) != std::string::npos;
 }
 
+/* 扫中文：UTF-8 里 CJK 汉字是 0xE4~0xE9 开头，中文标点是 0xE3 0x80 / 0xEF 0xBC 之类 */
+bool hasCjk(const std::string& s) {
+  for (size_t i = 0; i + 1 < s.size(); i++) {
+    const unsigned char a = static_cast<unsigned char>(s[i]);
+    const unsigned char b = static_cast<unsigned char>(s[i + 1]);
+    if (a >= 0xE4 && a <= 0xE9) {
+      return true;
+    }
+    if ((a == 0xE3 && b == 0x80) || (a == 0xEF && b == 0xBC)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /* ---------------- 离屏界面 ---------------- */
 
 struct Offscreen {
@@ -179,6 +194,46 @@ bool clickAction(Offscreen& o, const std::string& action, int w, int h) {
   return true;
 }
 
+/*
+ * 运行面板比一屏长：滚到目标控件进入可视区再点它。
+ * 滚出可视区的控件不接收点击（见 draw_ui.cpp 画完面板后的那一段），所以自检要像人一样先滚，
+ * 否则点下去会被当成「点面板外」，反而把面板关掉。
+ */
+template <typename Visible>
+void revealControl(Offscreen& o, int w, int h, Visible visible) {
+  o.render(w, h);
+  for (int i = 0; i < 8 && !visible(); i++) { /* 往下滚 */
+    o.app.wheelAt(static_cast<float>(w) * 0.5f, static_cast<float>(h) * 0.5f, -4.0f);
+    o.render(w, h);
+  }
+  for (int i = 0; i < 8 && !visible(); i++) { /* 还找不到就往上滚 */
+    o.app.wheelAt(static_cast<float>(w) * 0.5f, static_cast<float>(h) * 0.5f, 4.0f);
+    o.render(w, h);
+  }
+}
+
+/* 点浮层里的一个按钮：先确保它在可视区里 */
+bool clickPanel(Offscreen& o, const std::string& action, int w, int h) {
+  revealControl(o, w, h, [&o, &action]() { return o.app.controlVisible(action); });
+  return clickAction(o, action, w, h);
+}
+
+/* 点浮层里的一个输入框：先确保它在可视区里 */
+bool clickFieldBox(Offscreen& o, int fieldId, int w, int h) {
+  revealControl(o, w, h, [&o, fieldId]() { return o.app.fieldVisible(fieldId); });
+  float x = 0;
+  float y = 0;
+  o.render(w, h);
+  if (!o.app.fieldCenter(fieldId, &x, &y)) {
+    printf("  [失败] 界面上找不到输入框：%d\n", fieldId);
+    g_fail++;
+    return false;
+  }
+  o.app.clickAt(x, y);
+  o.render(w, h);
+  return true;
+}
+
 void dragFromTo(ui::App& app, float x0, float y0, float x1, float y1, bool ctrl) {
   app.setModifiers(ctrl, false, false);
   app.pressAt(x0, y0);
@@ -196,6 +251,8 @@ void dragFromTo(ui::App& app, float x0, float y0, float x1, float y1, bool ctrl)
 int selftest(const std::string& assets, const std::string& data, const std::string& shots) {
   const int W = 1360;
   const int H = 880;
+  /* 界面语言存在数据目录里：先把这份清掉，每次自检都从中文开始 */
+  DeleteFileA((data + "\\lang.txt").c_str());
   Offscreen o;
   if (!o.start(W, H, assets, data, shots)) {
     return 2;
@@ -216,25 +273,35 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
   check(o.app.panel() == 0, "起始没有浮层面板");
   o.shot("home");
 
-  printf("\n-- 2. 测试循环面板 --\n");
-  clickAction(o, "test", W, H);
-  check(o.app.panel() == 2, "点「测试循环」打开了面板");
+  printf("\n-- 2. 运行循环面板 --\n");
+  clickAction(o, "runPanel", W, H);
+  check(o.app.panel() == 2, "点「运行循环」打开了面板");
   check(!o.app.runSummary().empty(), "给出了层数与耗时", o.app.runSummary());
   check(has(o.app.stepText(), "/7"), "逐层信息显示 1/7 层", o.app.stepText());
   check(has(o.app.sampleText(), "网络判定"), "示例信息里有网络判定", o.app.sampleText());
   check(has(o.app.probText(), "输出概率"), "概率一行有内容", o.app.probText());
-  o.shot("test-panel");
+  /* 前向与训练在同一个面板里：先钉住「看一次」的语义（不改权重、也不进统计） */
+  {
+    const int before = o.app.steps();
+    check(has(o.app.trainText(), "预览"), "打开面板就是看一次，说明里写明不改权重",
+          o.app.trainText());
+    clickPanel(o, "test", W, H);
+    check(o.app.steps() == before, "「按当前结构重新测试」只刷新画面，不计入统计",
+          std::to_string(o.app.steps()));
+    check(o.app.rewardCurve().empty(), "「看一次」不往奖励曲线里加东西");
+  }
+  o.shot("run-panel");
 
   printf("\n-- 3. 逐层切换 --\n");
   const std::string step1 = o.app.stepText();
-  clickAction(o, "nextStep", W, H);
+  clickPanel(o, "nextStep", W, H);
   const std::string step2 = o.app.stepText();
   check(step2 != step1, "「下一层」切到了下一层", step2);
-  clickAction(o, "prevStep", W, H);
+  clickPanel(o, "prevStep", W, H);
   check(o.app.stepText() == step1, "「上一层」切回来了", o.app.stepText());
 
   printf("\n-- 4. 全量评估（显卡批量 / CPU 逐张）--\n");
-  clickAction(o, "evalAll", W, H);
+  clickPanel(o, "evalAll", W, H);
   check(has(o.app.evalText(), "识别正确 20/20"), "自带 20 个样本全部识别正确", o.app.evalText());
   check(has(o.app.evalText(), "计算后端"), "结论里写明了计算后端", o.app.evalText());
   if (gpu::ok()) {
@@ -244,16 +311,16 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
   }
   o.shot("eval-all");
   /* 关掉显卡：结论必须还是 20/20，后端如实改成 CPU 逐张 */
-  clickAction(o, "cudaToggle", W, H);
+  clickPanel(o, "cudaToggle", W, H);
   check(!gpu::enabled(), "点一下「显卡加速」把它切成了关");
-  clickAction(o, "evalAll", W, H);
+  clickPanel(o, "evalAll", W, H);
   check(has(o.app.evalText(), "识别正确 20/20"), "关掉显卡后结论仍然 20/20", o.app.evalText());
   check(has(o.app.evalText(), "CPU 逐张"), "后端如实改成 CPU 逐张", o.app.evalText());
   o.shot("eval-all-cpu");
   /* 再开回来，后续步骤默认走显卡 */
-  clickAction(o, "cudaToggle", W, H);
+  clickPanel(o, "cudaToggle", W, H);
   check(gpu::enabled(), "再点一下又切回显卡");
-  clickAction(o, "evalAll", W, H);
+  clickPanel(o, "evalAll", W, H);
   if (gpu::ok()) {
     check(has(o.app.evalText(), "CUDA"), "切回显卡后结论又报 CUDA", o.app.evalText());
   }
@@ -485,7 +552,7 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
     check(o.app.moduleCount() == 7, "恢复示例网络");
   }
 
-  printf("\n-- 12. 训练循环 --\n");
+  printf("\n-- 12. 运行循环（前向 + 可选更新权重）--\n");
   {
     int xorIndex = -1;
     for (size_t i = 0; i < o.app.library().size(); i++) {
@@ -509,39 +576,54 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
     check(has(o.app.noteText(), "公式已按示例设好"), "公式预设生效", o.app.noteText());
     o.shot("xor-added");
 
-    clickAction(o, "trainPanel", W, H);
-    check(o.app.panel() == 4, "打开了训练循环面板");
-    clickAction(o, "trainToggle", W, H);
-    check(o.app.loopOn(), "开始训练：循环进入运行态");
+    clickAction(o, "runPanel", W, H);
+    check(o.app.panel() == 2, "打开了运行循环面板");
+    check(o.app.trainable(), "异或示例这个结构可训练（有自生成输入）");
+    clickPanel(o, "runToggle", W, H);
+    check(o.app.loopOn(), "开始：循环进入运行态");
     for (int i = 0; i < 30; i++) {
       o.app.loopTick();
     }
     o.render(W, H);
     check(o.app.steps() >= 30, "循环真的走了 30 拍以上", std::to_string(o.app.steps()));
-    check(has(o.app.trainText(), "损失"), "训练面板报了损失", o.app.trainText());
-    check(has(o.app.loopText(), "训练中"), "循环状态一行在更新", o.app.loopText());
+    check(has(o.app.probText(), "损失"), "面板报了损失", o.app.probText());
+    check(has(o.app.loopText(), "运行中"), "循环状态一行在更新", o.app.loopText());
+    check(o.app.rewardCurve().size() >= 2, "奖励曲线跟着每一拍在长",
+          std::to_string(o.app.rewardCurve().size()));
     o.shot("training");
-    clickAction(o, "trainToggle", W, H);
+    clickPanel(o, "runToggle", W, H);
     check(!o.app.loopOn(), "暂停：循环停下来了");
-    clickAction(o, "oneStep", W, H);
-    check(o.app.steps() >= 31, "「单步」又往前走了一步", std::to_string(o.app.steps()));
-    clickAction(o, "resetnet", W, H);
+    /* 暂停之后：看一次不动统计，单步才往前走 */
+    {
+      const int atPause = o.app.steps();
+      clickPanel(o, "nextSample", W, H);
+      check(o.app.steps() == atPause, "「下一个示例」只是换一张图看，不计入统计",
+            std::to_string(o.app.steps()));
+      clickPanel(o, "oneStep", W, H);
+      check(o.app.steps() >= atPause + 1, "「单步」又往前走了一步", std::to_string(o.app.steps()));
+    }
+    /* 同一个循环里切换「更新权重」：关掉就只做前向 */
+    clickPanel(o, "p:train:-1", W, H);
+    check(!o.app.lab().cfg.train, "「更新权重」切成了关");
+    clickPanel(o, "oneStep", W, H);
+    check(has(o.app.trainText(), "只做前向"), "关掉更新权重之后这一拍只做前向", o.app.trainText());
+    clickPanel(o, "p:train:-1", W, H);
+    check(o.app.lab().cfg.train, "再点一下又打开了更新权重");
+    clickPanel(o, "oneStep", W, H);
+    check(has(o.app.trainText(), "更新权重"), "打开之后这一拍按学习率更新权重", o.app.trainText());
+    clickPanel(o, "resetnet", W, H);
     check(o.app.rewardCurve().empty(), "「重置神经网络」把奖励曲线清空了");
     check(has(o.app.noteText(), "已重置"), "重置有回执", o.app.noteText());
   }
 
   printf("\n-- 13. 自定义函数 --\n");
   {
-    clickAction(o, "labOpen", W, H);
-    check(o.app.panel() == 4, "函数设置在训练循环面板里展开");
-    /* 点「输入函数」输入框并改写公式 */
-    float fx = 0;
-    float fy = 0;
-    o.render(W, H);
-    const bool found = o.app.fieldCenter(0 /* F_IN */, &fx, &fy);
+    clickPanel(o, "labOpen", W, H);
+    check(o.app.panel() == 2, "函数设置在运行循环面板里展开");
+    /* 点「输入函数」输入框并改写公式（面板比一屏长，点击前先把输入框滚进可视区） */
+    const bool found = clickFieldBox(o, 0 /* F_IN */, W, H);
     check(found, "看得到输入函数输入框");
     if (found) {
-      o.app.clickAt(fx, fy);
       check(o.app.focusField() == 0, "点一下输入框就把焦点给它了");
       o.app.typeText("+1");
       o.render(W, H);
@@ -565,12 +647,12 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
       o.shot("formula-backspace");
       o.shot("formula-edit");
     }
-    clickAction(o, "labReset", W, H);
+    clickPanel(o, "labReset", W, H);
     check(has(o.app.noteText(), "已恢复默认"), "恢复默认公式有回执", o.app.noteText());
     check(o.app.lab().cfg.inSrc == core::LAB_IN_DEFAULT, "输入公式回到默认 px/255",
           o.app.lab().cfg.inSrc);
     o.shot("lab");
-    clickAction(o, "labDoc4", W, H);
+    clickPanel(o, "labDoc4", W, H);
     o.render(W, H);
     o.shot("lab-doc");
     clickAction(o, "close", W, H);
@@ -593,6 +675,45 @@ int selftest(const std::string& assets, const std::string& data, const std::stri
     clickAction(o, "reset", W, H);
     check(o.app.moduleCount() == 7, "「示例网络」恢复初始结构");
     o.shot("restored");
+  }
+
+  printf("\n-- 15. 界面语言（中文 / English）--\n");
+  {
+    check(core::lang() == core::LANG_ZH, "默认是中文");
+    check(has(o.app.statusText(), "结构完整"), "中文下结构概览是中文", o.app.statusText());
+    clickAction(o, "lang", W, H);
+    check(core::lang() == core::LANG_EN, "点一下顶栏的语言按钮切到了英文");
+    o.render(W, H);
+    /* 英文下，界面上能取到的每一句都不该再出现中文 */
+    const std::string texts[13] = {
+        o.app.statusText(), o.app.selTitle(),  o.app.selSub(),     o.app.stepText(),
+        o.app.sampleText(), o.app.probText(),  o.app.runSummary(), o.app.loopText(),
+        o.app.trainText(),  o.app.noteText(),  o.app.zoomText(),   o.app.evalText(),
+        o.app.innerText()};
+    int left = 0;
+    for (int i = 0; i < 13; i++) {
+      if (hasCjk(texts[i])) {
+        left++;
+        printf("    [中文残留] %s\n", texts[i].c_str());
+      }
+    }
+    check(left == 0, "英文界面里没有中文残留", std::to_string(left) + " 处");
+    check(!hasCjk(o.app.noteText()) && has(o.app.noteText(), "English"), "切换回执是英文",
+          o.app.noteText());
+    o.shot("lang-en");
+    /* 面板里的文案也要跟着走 */
+    clickAction(o, "runPanel", W, H);
+    o.render(W, H);
+    check(!hasCjk(o.app.runSummary()) && !hasCjk(o.app.loopText()) && !hasCjk(o.app.stepText()),
+          "英文下面板文案也是英文", o.app.runSummary());
+    o.shot("lang-en-panel");
+    clickAction(o, "close", W, H);
+    /* 切回中文：中文文案必须逐字变回原文 */
+    clickAction(o, "lang", W, H);
+    check(core::lang() == core::LANG_ZH, "再点一下切回中文");
+    o.render(W, H);
+    check(has(o.app.statusText(), "结构完整"), "回到中文的结构概览", o.app.statusText());
+    check(has(o.app.noteText(), "界面语言："), "回到中文的切换回执", o.app.noteText());
   }
 
   o.stop();

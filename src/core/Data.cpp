@@ -106,6 +106,6 @@ Weights parseWeights(const std::string& text) {
   return w;
 }
 
-std::string sampleName(int i) { return "样本" + std::to_string(i + 1); }
+std::string sampleName(int i) { return tr("样本", "sample ") + std::to_string(i + 1); }
 
 }  // namespace core

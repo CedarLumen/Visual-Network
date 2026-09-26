@@ -1,4 +1,4 @@
-# 构建脚本：用随 Visual Studio 安装的 CMake 配置并编译（不需要 DevEco、不需要改环境变量）
+﻿# 构建脚本：用随 Visual Studio 安装的 CMake 配置并编译（不需要 DevEco、不需要改环境变量）
 #   powershell -File tools\build.ps1            配置 + 编译 Release
 #   powershell -File tools\build.ps1 -Clean     先删构建目录再从头编
 param(

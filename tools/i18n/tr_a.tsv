@@ -1,0 +1,140 @@
+没有读到示例数字文件（assets/digits.txt）	Could not read the sample digit file (assets/digits.txt)
+左键拖空白即框选，中键拖动平移，滚轮缩放，双击模块看神经元	Drag empty space with the left button to marquee select, drag with the middle button to pan, scroll to zoom, double-click a module to see its neurons
+学习率 	Learning rate 
+错误 	Error 
+提示 	Notice 
+ 个模块  ·  约 	 modules  ·  about 
+ 个参数	 parameters
+缩放 	Zoom 
+未选中模块	No module selected
+在画布上点选模块，这里显示它的参数	Click a module on the canvas to see its parameters here
+已选 	Selected 
+ 个模块	 modules
+下方按钮对选中的这几个模块整体生效	The buttons below apply to the selected modules as a whole
+ · 输出 	 · outputs 
+ 个神经元	 neurons
+运行中 · 目标每秒 	Running · target per second 
+ 步	 steps
+ · 单步 	 · single step 
+ · 每步更新权重	 · update weights each step
+ · 只做前向	 · forward only
+已暂停 · 每步更新权重	Paused · update weights each step
+已暂停 · 只做前向	Paused · forward only
+尚未开始	Not started
+尚未开始 · 只做前向	Not started · forward only
+运行中	Running
+ · 训练	 · training
+ · 前向	 · forward
+ · 每秒 	 · at 
+ 步 · 已 	 steps/s · done 
+已暂停 · 已 	Paused · after 
+第 	At 
+ · 示例 	 · sample 
+ · 真实数字 	 · true digit 
+ · 网络判定 	 · network prediction 
+ 正确	 correct
+ 与真实不同	 differs from true digit
+ · 输入 	 · input 
+ → 输出 	 -> output 
+输出概率：	Output probability: 
+输出值：	Output values: 
+ 类 	 -> 
+没有输出层，无法给出类别结果	No output layer, so no class result can be given
+  ·  期望 	  ·  expected 
+神经网络已重置：权重回到初始值，训练记录与曲线已清空	Network has been reset: weights are back to their initial values, and the training records and curves are cleared
+已重新随机 	Rerolled 
+ 个自生成输入	 random inputs
+选中的模块里没有自生成输入	The selected modules contain no random input
+表达式求值出错：	Expression error: 
+结构与示例网络不一致，权重按结构生成，只做前向计算	The structure differs from the example network, so weights are generated from the structure and only the forward pass runs
+每步按学习率 	each step: learning rate 
+ 更新权重	 updates weights
+使用当前权重（这一步只做前向）	Using the current weights (forward pass only this step)
+使用自带的预训练参数（示例网络）	Using the built-in pretrained parameters (example network)
+画布上没有可运行的层	No runnable layer on the canvas
+ 层 · 用时 	 layers · took 
+运行正常	ran fine
+本步奖励 	Step reward 
+损失 	Loss 
+ · 平均绝对误差 	 · mean absolute error 
+预览前向：不改权重，也不计入统计	Preview forward pass: does not change weights and is not counted in the stats
+本步已按学习率 	This step: learning rate 
+本步只做前向：当前结构没有可训练的层（加自生成输入或目标输出元件才会训练）	Forward pass only this step: the current structure has no trainable layer (training starts once you add a random input or a target-output element)
+本步只做前向：更新权重已关	Forward pass only this step: update weights is off
+本步只做前向（这一拍没有走反向传播）	Forward pass only this step (no backpropagation ran this step)
+未加载示例文件，无法评估	No sample file loaded, cannot evaluate
+画布上没有可运行的模块，无法评估	No runnable module on the canvas, cannot evaluate
+(真 	(true 
+ 判 	 predicted 
+自带示例 	Built-in samples: 
+ 个手写数字：识别正确 	 handwritten digits: correct 
+，合计 	, total 
+ ms  ·  计算后端 	 ms  ·  compute backend 
+（批量一次算完）  ·  按当前奖励函数的平均奖励 	 (all in one batch)  ·  mean reward of the current reward function 
+；不符的样本：	; mismatches: 
+ ms  ·  计算后端 CPU 逐张	 ms  ·  compute backend CPU, one by one
+  ·  按当前奖励函数的平均奖励 	  ·  mean reward of the current reward function 
+没训过的随机输入 	Untrained random inputs 
+ 组：平均得分 	 sets: mean score 
+ · 平均损失 	 · mean loss 
+ · 命中 	 · hits 
+ · 合计 	 · total 
+没有可用的示例输入	No sample input available
+画布上没有可运行的层，循环没有开始	No runnable layer on the canvas, so the loop did not start
+循环已开始 · 目标每秒 	Loop started · target per second 
+循环已暂停 · 已跑 	Loop paused · ran 
+画布上没有可运行的层，循环已停	No runnable layer on the canvas, the loop has stopped
+循环正在跑，先「暂停」再单步	The loop is running: press "Pause" first, then single step
+画布上没有可运行的层，这一步没有执行	No runnable layer on the canvas, so this step did not run
+已添加「	Added "
+」，共 	", 
+，公式已按示例设好	 (formula preset from the sample)
+已删除 	Deleted 
+已复制 	Copied 
+组合	 group
+已把 	Grouped 
+ 个模块成组	 modules into a group
+已解组	Ungrouped
+已按左右顺序连线并排整齐	Linked and arranged left to right
+已恢复示例网络	Example network restored
+ 个神经元 · 已选 	 neurons, 
+ 个	 selected
+循环频率	Loop frequency
+学习率	Learning rate
+更新权重	Update weights
+输出个数	Outputs
+卷积核个数	Kernels
+窗口边长	Window size
+步长	Stride
+边缘填充	Padding
+神经元个数	Units
+激活函数	Activation
+池化方式	Pooling mode
+输入高度	Input height
+输入宽度	Input width
+ 步/秒	 steps/s
+开	On
+关	Off
+最大池化	Max pooling
+平均池化	Average pooling
+（－ 减半，＋ 加倍）	 (- halves, + doubles)
+开 = 每步更新权重，关 = 只看前向	On = update weights each step, Off = forward pass only
+线性/ReLU/Sigmoid/Tanh/Softmax	Linear/ReLU/Sigmoid/Tanh/Softmax
+最大/平均	Max/average
+每步更新权重	Update weights each step
+已关闭权重更新，只看前向	Weight updates off, forward pass only
+已开启显卡计算	GPU acceleration enabled
+已关闭显卡计算，改在 CPU 上算	GPU acceleration disabled, computing on CPU
+已按左右顺序自动连线	Auto-linked in left-to-right order
+已退出框选模式	Marquee select mode exited
+统计已清零：步数、平均奖励与奖励曲线都从这一拍重新算	Stats reset: steps, mean reward and the reward curve all restart from this step
+已恢复默认的输入、输出、奖励与目标函数	Default input, output, reward and target functions restored
+已关闭面板	Panel closed
+已取消连线	Link cancelled
+已让整张图进入视野	Fitted the whole graph into view
+起点已选，点目标模块完成连线	Start point selected, click the target module to finish the link
+已选 	Selected 
+ 个模块	 modules
+已整体移动 	Moved 
+已退出框选模式	Marquee select mode exited
+已连线 	Linked 

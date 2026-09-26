@@ -1,0 +1,423 @@
+﻿== 神经网络模拟引擎 · 一键验证 ==
+工程目录：C:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win
+构建目录：D:\NNE-win-build（Release）
+日志文件：C:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\tools\out\verify-20260926-075738.log
+
+-- 1. 配置与编译 --
+构建完成
+
+-- 2. 全量断言套件 --
+共登记 35 个套件
+
+== K 表达式语言 ==
+  -- K 表达式语言：通过 78，失败 0
+
+== L 自定义函数语义 ==
+  -- L 自定义函数语义：通过 63，失败 0
+
+== F 画布交互数学 ==
+  -- F 画布交互数学：通过 53，失败 0
+
+== G-gfx ==
+  GL_VERSION = 3.3.0 NVIDIA 595.71
+  GL_RENDERER = NVIDIA GeForce RTX 5060 Laptop GPU/PCIe/SSE2
+  font(16) 行高 = 22.000000
+  -- G-gfx：通过 5，失败 0
+
+== G-gfx ==
+  像素读回：中心 (255,128,48)
+  -- G-gfx：通过 7，失败 0
+
+== G-gfx ==
+  textWidth(输入层)=96.000000 textWidth(输)=32.000000 textWidth(0123456789)=200.000000 textHeight=42.000000
+  中文文本前景像素=1656，数字文本前景像素=2501
+  -- G-gfx：通过 7，失败 0
+
+== G-gfx ==
+  冷/热字形缓存两次绘制的最大通道差 = 0，超差像素数 = 0
+  -- G-gfx：通过 3，失败 0
+
+== G-gfx ==
+  -- G-gfx：通过 17，失败 0
+
+== G-gfx ==
+  PNG 字节数 = 230663
+  -- G-gfx：通过 10，失败 0
+
+== G-gfx ==
+  自检图字节数 = 2480873，采样颜色数 = 112
+  自检图路径 = C:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\tools\out\gfx_selftest.png
+  -- G-gfx：通过 9，失败 0
+
+== G-gpu ==
+  gpu::init -> true
+  gpu::ok()          = true
+  gpu::deviceCount() = 1
+  gpu::deviceName()  = NVIDIA GeForce RTX 5060 Laptop GPU
+  计算能力 cc 12.0，SM 数 26
+  gpu::modeText()    = CUDA · NVIDIA GeForce RTX 5060 Laptop GPU
+  精度模式           = 精确 double
+  -- G-gpu：通过 9，失败 0
+
+== G-gpu ==
+  GPU 调用次数 = 57，内核启动 57 次
+  -- G-gpu：通过 140，失败 0
+
+== G-gpu ==
+  含 exp 通路实测最大差 = 1.73e-18（  ^ 激活 Softmax（m32 n13））
+  -- G-gpu：通过 88，失败 0
+
+== G-gpu ==
+  批量算子与逐样本调用逐位对拍（容差 0）
+  softmaxBatch 相对逐行 Softmax 的实测最大差 = 0
+  快速 float 卷积最大差 = 6.34e-07
+  精确 double 卷积最大差 = 0
+  -- G-gpu：通过 108，失败 0
+
+== G-gpu ==
+  关掉 CUDA 后 modeText = CPU（已在界面上关闭 CUDA 加速）
+  -- G-gpu：通过 30，失败 0
+
+== G-gpu ==
+  示例网络：输入 1×28×28 → 卷积 6×5×5 → 池化 2 → 卷积 16×5×5 → 池化 2 → 展平 256 → 全连接 10
+  各层尺寸：1×28 → 卷积 6×24 → 池化 6×12 → 卷积 16×8 → 池化 16×4 → 展平 256 → 全连接 10
+  样本数 N = 10000
+  批量 double 输出元素数 = 100000，与 CPU 的最大差 = 0
+  单样本 double 与 CPU 最大差 = 0；float 与 CPU 最大差 = 2.34e-06
+  CPU 逐样本（double，core::Ops）       2529.2 ms
+  GPU 批量（double 精确）             599.3 ms
+  GPU 批量（float 快速）              396.7 ms
+  GPU 单样本循环（double 精确）      19252.5 ms
+  GPU 单样本循环（float 快速）      20109.0 ms
+  GPU 批量 double 相对 CPU 加速比        4.22x
+  GPU 批量 float 相对 CPU 加速比        6.38x
+  GPU 批量 float 相对 GPU 批量 double        1.51x
+  GPU 批量 float 相对 GPU 单样本 float       50.69x
+  统计：launches=300157 h2d=6149.3MB d2h=3852.2MB kernelMs=6257.6 cpuCalls=6 gpuCalls=300139
+  含 exp 通路实测最大差 = 1.67e-16
+  快速 float 模式实测最大差 = 2.34e-06（示例网络 float 批量前向（10000 样本））
+  -- G-gpu：通过 9，失败 0
+
+== D 图操作 ==
+  -- D 图操作：通过 55，失败 0
+
+== E 参数边界与神经元 ==
+  -- E 参数边界与神经元：通过 32，失败 0
+
+== J 未接入模块的隔离 ==
+  结构指纹 -1102805290 -> -1685649445（未接入层也计入）；不固定权重时两轮输出最大差 0.009946
+  -- J 未接入模块的隔离：通过 42，失败 0
+
+== M 循环频率与统计 ==
+  -- M 循环频率与统计：通过 31，失败 0
+
+== O 目标输出奖励元件 ==
+  -- O 目标输出奖励元件：通过 11，失败 0
+
+== S 频率上限与空结果 ==
+  -- S 频率上限与空结果：通过 15，失败 0
+
+== T 空结果与逐层光标 ==
+  -- T 空结果与逐层光标：通过 18，失败 0
+
+== U 测试与训练分开 ==
+  -- U 测试与训练分开：通过 13，失败 0
+
+== Z MNIST 全量评估 ==
+  CPU 单样本逐张：9807 / 10000 = 98.07%，耗时 2796.0 ms（3577 张/秒）
+  批量评估后端：CUDA · NVIDIA GeForce RTX 5060 Laptop GPU
+  批量接口 20 个样本：输出概率与逐张最大差 = 3.47e-18，耗时 7.98 ms（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）
+  批量接口 20 个样本的用量：gpuCalls +8，cpuCalls +0
+  关掉 CUDA 后 20 个样本：与开着时概率最大差 = 3.47e-18，耗时 5.11 ms（CPU（已在界面上关闭 CUDA 加速））
+  关掉 CUDA 期间的用量：gpuCalls +0，cpuCalls +8
+  批量评估后端：CUDA · NVIDIA GeForce RTX 5060 Laptop GPU
+  批量评估（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）：9807 / 10000 = 98.07%，流水线耗时 1053.3 ms（9494 张/秒），墙钟 1086.3 ms，与 CPU 逐张判定不一致的样本 0 个
+  CPU 逐张 2796.0 ms vs 批量 1053.3 ms：批量快 2.65x
+  10000 张这一批的用量：gpuCalls +8，cpuCalls +0（内核启动 8 次，H2D 829.7 MB，D2H 770.6 MB）
+  关掉 CUDA 后 10000 张：耗时 2794.9 ms（CPU（已在界面上关闭 CUDA 加速）），与开着时不一致 0 个
+  -- Z MNIST 全量评估：通过 79，失败 0
+
+== B 整模型逐层对拍 ==
+  -- B 整模型逐层对拍：通过 49，失败 0
+
+== C 自带示例样本 ==
+  -- C 自带示例样本：通过 69，失败 0
+
+== H 随机权重复现 ==
+  -- H 随机权重复现：通过 6，失败 0
+
+== A 算子对拍 ==
+  用例条数：26
+  卷积 12 组、池化 8 组、全连接 6 组，共比对 1376 个数值
+  -- A 算子对拍：通过 83，失败 0
+
+== I 形状推演 ==
+  -- I 形状推演：通过 14，失败 0
+
+== G 存档往返 ==
+  -- G 存档往返：通过 45，失败 0
+
+== N 反向传播对拍 ==
+  -- N 反向传播对拍：通过 33，失败 0
+
+== P 训练：损失真的在降 ==
+  400 步：首步损失 0.053511 → 末步 0.011390；起步窗口(1~20)平均 0.086480 → 末段窗口(381~400)平均 0.023067
+  没见过的新输入（第 1000~1099 步）：没训过平均损失 0.584249 → 训过 0.251990
+  -- P 训练：损失真的在降：通过 12，失败 0
+
+== Q 异或示例 ==
+  同号(0.9,0.9)→判定 0 输出 1.006/-0.061；同号(-0.9,-0.9)→判定 0 输出 0.771/0.071
+  异号(0.9,-0.9)→判定 1 输出 -0.124/1.032；异号(-0.9,0.9)→判定 1 输出 0.051/0.891
+  -- Q 异或示例：通过 12，失败 0
+
+== R 未接入的模块不该打断训练 ==
+  带孤立层训练 300 步：损失 0.239077 → 0.002195
+  -- R 未接入的模块不该打断训练：通过 6，失败 0
+
+==== 总计：通过 1261，失败 0 ====
+  断言总计：通过 1261，失败 0
+
+-- 3. 命令行端到端 --
+
+  > nne_cli --selftest
+== 无头界面自检（窗口 1360x880，全部离屏，不弹窗口）==
+
+-- 1. 起始状态 --
+  [通过] 示例网络 7 个模块
+  [通过] 结构校验显示「结构完整」
+  [通过] 参数量 5142
+  [通过] 起始没有浮层面板
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\01-home.png
+
+-- 2. 运行循环面板 --
+  [通过] 点「运行循环」打开了面板
+  [通过] 给出了层数与耗时
+  [通过] 逐层信息显示 1/7 层
+  [通过] 示例信息里有网络判定
+  [通过] 概率一行有内容
+  [通过] 打开面板就是看一次，说明里写明不改权重
+  [通过] 「按当前结构重新测试」只刷新画面，不计入统计
+  [通过] 「看一次」不往奖励曲线里加东西
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\02-run-panel.png
+
+-- 3. 逐层切换 --
+  [通过] 「下一层」切到了下一层
+  [通过] 「上一层」切回来了
+
+-- 4. 全量评估（显卡批量 / CPU 逐张）--
+  [通过] 自带 20 个样本全部识别正确
+  [通过] 结论里写明了计算后端
+  [通过] 有可用的显卡时，批量评估在显卡上算
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\03-eval-all.png
+  [通过] 点一下「显卡加速」把它切成了关
+  [通过] 关掉显卡后结论仍然 20/20
+  [通过] 后端如实改成 CPU 逐张
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\04-eval-all-cpu.png
+  [通过] 再点一下又切回显卡
+  [通过] 切回显卡后结论又报 CUDA
+
+-- 5. 关面板 / 模块库 --
+  [通过] 「关闭」关掉了面板
+  [通过] 点「模块库」打开了面板
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\05-library.png
+  [通过] 放入「完整示例网络」后共 14 个模块
+  [通过] 新放进去的 7 个模块处于选中态
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\06-added-example.png
+
+-- 6. 删除选中（Delete 键）--
+  [通过] 删除后回到 7 个模块
+  [通过] 给出删除回执
+
+-- 7. 框选 --
+  [通过] 整屏框选选中全部 7 个模块
+  [通过] 给出框选回执
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\07-marquee.png
+  [通过] Esc 清空选择
+
+-- 8. 拖动模块与网格吸附 --
+  [通过] 画布上找得到可点的模块
+  [通过] 拖动后选中 1 个模块
+  [通过] 模块位置确实变了
+  [通过] 松手后吸附到 8 的网格
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\08-drag-snap.png
+
+-- 9. 连线（拖线与两步连线）--
+  [通过] 重新接一条已有的通路不会越连越多（一进一出）
+  [通过] 给出连线回执
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\09-relink.png
+  [通过] 跨层重连：断掉原来两条、只加一条（一进一出）
+  [通过] 点端口后进入两步连线
+  [通过] Esc 取消连线
+
+-- 10. 神经元内部视图 --
+  [通过] 双击模块进入神经元内部视图
+  [通过] 内部视图显示 6 个神经元（卷积层 6 个核）
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\10-inner-view.png
+  [通过] 「全选」选中 6 个神经元
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\11-inner-selected.png
+  [通过] 算得出第 0 个神经元的中心
+  [通过] 点一下选中 1 个神经元
+  [通过] 删掉 1 个神经元后剩 5 个（通道数跟着减）
+  [通过] 全选删除后保底剩 1 个通道（原版语义）
+  [通过] 「返回画布」回到画布
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\12-after-inner.png
+  [通过] 恢复示例网络
+
+-- 11. 参数加减与快捷键 --
+  [通过] 点选模块
+  [通过] 「＋」让卷积核个数加一
+  [通过] 连续加不会越过上限 64
+  [通过] Ctrl+A 全选模块
+  [通过] Ctrl+D 复制出 7 个模块
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\13-duplicate.png
+  [通过] 恢复示例网络
+
+-- 12. 运行循环（前向 + 可选更新权重）--
+  [通过] 模块库里找得到异或示例
+  [通过] 打开了模块库面板
+  [通过] 异或示例放进来后共 10 个模块
+  [通过] 公式预设生效
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\14-xor-added.png
+  [通过] 打开了运行循环面板
+  [通过] 异或示例这个结构可训练（有自生成输入）
+  [通过] 开始：循环进入运行态
+  [通过] 循环真的走了 30 拍以上
+  [通过] 面板报了损失
+  [通过] 循环状态一行在更新
+  [通过] 奖励曲线跟着每一拍在长
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\15-training.png
+  [通过] 暂停：循环停下来了
+  [通过] 「下一个示例」只是换一张图看，不计入统计
+  [通过] 「单步」又往前走了一步
+  [通过] 「更新权重」切成了关
+  [通过] 关掉更新权重之后这一拍只做前向
+  [通过] 再点一下又打开了更新权重
+  [通过] 打开之后这一拍按学习率更新权重
+  [通过] 「重置神经网络」把奖励曲线清空了
+  [通过] 重置有回执
+
+-- 13. 自定义函数 --
+  [通过] 函数设置在运行循环面板里展开
+  [通过] 看得到输入函数输入框
+  [通过] 点一下输入框就把焦点给它了
+  [通过] 输入的公式进了配置
+  [通过] 在输入框末尾能继续输入
+  [通过] 退格键把刚输入的字符删掉了
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\16-formula-backspace.png
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\17-formula-edit.png
+  [通过] 恢复默认公式有回执
+  [通过] 输入公式回到默认 px/255
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\18-lab.png
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\19-lab-doc.png
+
+-- 14. 一键整理与空画布 --
+  [通过] 一键整理有回执
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\20-arranged.png
+  [通过] 全部删除后画布为空
+  [通过] 状态栏给出空画布提示
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\21-empty.png
+  [通过] 「示例网络」恢复初始结构
+  [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\22-restored.png
+
+== 无头界面自检结束：通过 87，失败 0 ==
+      [截图] C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win\tools\out\ui\22-restored.png
+    
+    == 无头界面自检结束：通过 87，失败 0 ==
+
+  > nne_cli --samples
+样本  1 d1_0   真实 0  判定 0  概率 1.000  正确
+样本  2 d2_0   真实 0  判定 0  概率 1.000  正确
+样本  3 d3_1   真实 1  判定 1  概率 0.999  正确
+样本  4 d4_1   真实 1  判定 1  概率 0.999  正确
+样本  5 d5_2   真实 2  判定 2  概率 1.000  正确
+样本  6 d6_2   真实 2  判定 2  概率 1.000  正确
+样本  7 d7_3   真实 3  判定 3  概率 0.895  正确
+样本  8 d8_3   真实 3  判定 3  概率 1.000  正确
+样本  9 d9_4   真实 4  判定 4  概率 1.000  正确
+样本 10 d10_4  真实 4  判定 4  概率 0.928  正确
+样本 11 d11_5  真实 5  判定 5  概率 0.943  正确
+样本 12 d12_5  真实 5  判定 5  概率 0.992  正确
+样本 13 d13_6  真实 6  判定 6  概率 1.000  正确
+样本 14 d14_6  真实 6  判定 6  概率 1.000  正确
+样本 15 d15_7  真实 7  判定 7  概率 1.000  正确
+样本 16 d16_7  真实 7  判定 7  概率 1.000  正确
+样本 17 d17_8  真实 8  判定 8  概率 0.988  正确
+样本 18 d18_8  真实 8  判定 8  概率 0.999  正确
+样本 19 d19_9  真实 9  判定 9  概率 0.996  正确
+样本 20 d20_9  真实 9  判定 9  概率 0.998  正确
+合计 20/20 正确
+批量评估（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）：20/20 正确，耗时 7.79 ms，与逐张判定不一致 0 个
+    样本 17 d17_8  真实 8  判定 8  概率 0.988  正确
+    样本 18 d18_8  真实 8  判定 8  概率 0.999  正确
+    样本 19 d19_9  真实 9  判定 9  概率 0.996  正确
+    样本 20 d20_9  真实 9  判定 9  概率 0.998  正确
+    合计 20/20 正确
+    批量评估（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）：20/20 正确，耗时 7.79 ms，与逐张判定不一致 0 个
+
+  > nne_cli --train fit 400
+任务 fit，400 步，学习率 0.05
+  第    1 步  损失 0.053511
+  第   50 步  损失 0.005504
+  第  100 步  损失 0.000026
+  第  150 步  损失 0.001529
+  第  200 步  损失 0.004875
+  第  250 步  损失 0.000020
+  第  300 步  损失 0.068121
+  第  350 步  损失 0.015502
+  第  400 步  损失 0.011390
+损失 0.053511 → 0.011390（降到 21.3%）
+      第  300 步  损失 0.068121
+      第  350 步  损失 0.015502
+      第  400 步  损失 0.011390
+    损失 0.053511 → 0.011390（降到 21.3%）
+
+  > nne_cli --train xor 800
+任务 xor，800 步，学习率 0.1
+  第    1 步  损失 1.489949
+  第  100 步  损失 0.001041
+  第  200 步  损失 0.009198
+  第  300 步  损失 0.000388
+  第  400 步  损失 0.004369
+  第  500 步  损失 0.002270
+  第  600 步  损失 0.010441
+  第  700 步  损失 0.027879
+  第  800 步  损失 0.006894
+损失 1.489949 → 0.006894（降到 0.5%）
+      第  400 步  损失 0.004369
+      第  500 步  损失 0.002270
+      第  600 步  损失 0.010441
+      第  700 步  损失 0.027879
+      第  800 步  损失 0.006894
+    损失 1.489949 → 0.006894（降到 0.5%）
+
+  > nne_cli --mnist both
+MNIST 测试集 10000 张，模型权重 5142 个
+CPU 逐张：9807/10000 = 98.07%，耗时 2717.3 ms（3680.1 张/秒）
+GPU 批量（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）：9807/10000 = 98.07%，耗时 983.2 ms（含接口外拼像素的墙钟 1015.6 ms，10171 张/秒）
+内核启动 8 次，H2D 829.7 MB，D2H 770.6 MB，批量算子调用 gpuCalls 8 / cpuCalls 0
+与 CPU 逐张判定不一致的样本 0 个（正确数 9807 vs 9807）
+加速比（CPU 逐张 2717.3 ms / GPU 批量 983.2 ms）：2.76x
+    MNIST 测试集 10000 张，模型权重 5142 个
+    CPU 逐张：9807/10000 = 98.07%，耗时 2717.3 ms（3680.1 张/秒）
+    GPU 批量（CUDA · NVIDIA GeForce RTX 5060 Laptop GPU）：9807/10000 = 98.07%，耗时 983.2 ms（含接口外拼像素的墙钟 1015.6 ms，10171 张/秒）
+    内核启动 8 次，H2D 829.7 MB，D2H 770.6 MB，批量算子调用 gpuCalls 8 / cpuCalls 0
+    与 CPU 逐张判定不一致的样本 0 个（正确数 9807 vs 9807）
+    加速比（CPU 逐张 2717.3 ms / GPU 批量 983.2 ms）：2.76x
+
+-- 4. 画布网格直线性 --
+图像 C:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\tools\out\ui\01-home.png  画布区 x[0,1110) y[86,880)  受检带 y=4..170  整图 (880, 1360, 3)
+网格色像素：10976
+落在长直段上的网格像素：10893（99.244%）
+两向都短、只可能是斜/折线的像素：83（0.756%）
+  [通过] 斜线嫌疑像素在阈值内
+竖线 32 条，间距 min=33.0 max=34.0 均值=33.13 极差=1.0
+  [通过] 竖线等距
+结论：通过
+    两向都短、只可能是斜/折线的像素：83（0.756%）
+      [通过] 斜线嫌疑像素在阈值内
+    竖线 32 条，间距 min=33.0 max=34.0 均值=33.13 极差=1.0
+      [通过] 竖线等距
+    结论：通过
+
+== 全部通过 ==
+完整日志：C:\Users\CMZ\OneDrive\Desktop\workspace\NeuralNetworkEngine-Win\tools\out\verify-20260926-075738.log

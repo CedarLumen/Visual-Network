@@ -3,6 +3,8 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include "Lang.h"
+#include "Names.h"
 
 namespace core {
 
@@ -260,11 +262,11 @@ bool TrainNet::setup(const NetGraph& g, const Weights* weights) {
     db[oi] = zeros(m.p.units);
   }
   if (order.empty()) {
-    err = "图中没有模块";
+    err = tr("图中没有模块", "The graph has no modules");
     return false;
   }
   if (outIdx < 0) {
-    err = "没有输出层或目标输出元件，无法计算";
+    err = tr("没有输出层或目标输出元件，无法计算", "No output layer or target-output module; cannot compute");
     return false;
   }
   return true;
@@ -321,7 +323,7 @@ std::vector<double> TrainNet::forward(const NetGraph& g, int step, const SrcFn* 
       const T3 z =
           convForward(x, m.p.channels, w[oi], b[oi], m.p.k, m.p.stride, m.p.pad);
       if (z.h <= 0 || z.w <= 0) {
-        err = "窗口大于上游尺寸";
+        err = tr("窗口大于上游尺寸", "Window is larger than the upstream size");
         continue;
       }
       z3[oi] = z;
@@ -335,7 +337,7 @@ std::vector<double> TrainNet::forward(const NetGraph& g, int step, const SrcFn* 
       x3[oi] = x;
       const T3 z = poolForward(x, m.p.poolMode, m.p.k, m.p.stride);
       if (z.h <= 0 || z.w <= 0) {
-        err = "窗口大于上游尺寸";
+        err = tr("窗口大于上游尺寸", "Window is larger than the upstream size");
         continue;
       }
       z3[oi] = z;
@@ -390,17 +392,17 @@ std::vector<double> TrainNet::forward(const NetGraph& g, int step, const SrcFn* 
       y1[oi] = applyAct(z, act);
       kind[oi] = KIND_VEC;
     } else {
-      err = "有不支持的模块类型";
+      err = tr("有不支持的模块类型", "Unsupported module type present");
       return {};
     }
     ms[oi] = static_cast<int>(nowMs() - t0);
   }
   if (outIdx < 0) {
-    err = "没有输出层或目标输出元件，无法计算";
+    err = tr("没有输出层或目标输出元件，无法计算", "No output layer or target-output module; cannot compute");
     return {};
   }
   if (kind[outIdx] == KIND_NONE) {
-    err = "输出端没接上数据流，这一步算不出结果";
+    err = tr("输出端没接上数据流，这一步算不出结果", "The output side is not connected to the data flow; this step produces no result");
     return {};
   }
   return y1[outIdx];
@@ -485,13 +487,13 @@ bool TrainNet::applyLr(double lr) {
   for (size_t oi = 0; oi < order.size(); oi++) {
     for (size_t i = 0; i < dw[oi].size(); i++) {
       if (!std::isfinite(dw[oi][i])) {
-        err = "梯度出现非有限值，这一步没有更新权重";
+        err = tr("梯度出现非有限值，这一步没有更新权重", "The gradient contains non-finite values; weights were not updated in this step");
         return false;
       }
     }
     for (size_t i = 0; i < db[oi].size(); i++) {
       if (!std::isfinite(db[oi][i])) {
-        err = "梯度出现非有限值，这一步没有更新权重";
+        err = tr("梯度出现非有限值，这一步没有更新权重", "The gradient contains non-finite values; weights were not updated in this step");
         return false;
       }
     }
@@ -587,7 +589,7 @@ RunResult TrainNet::toResult(const NetGraph& g) const {
     const NetModule m = gGet(g, order[oi]);
     Step st;
     st.id = m.id;
-    st.name = m.name;
+    st.name = displayName(m.name);
     st.type = m.type;
     st.ms = ms[oi];
     total = total + st.ms;
@@ -608,8 +610,8 @@ RunResult TrainNet::toResult(const NetGraph& g) const {
         st.summary = st.outShape + " " + std::to_string(m.p.channels) + "×" +
                      std::to_string(m.p.k) + "×" + std::to_string(m.p.k);
       } else if (m.type == MOD_POOL) {
-        st.summary = (m.p.poolMode == POOL_MAX ? "最大池化 " : "平均池化 ") +
-                     std::to_string(m.p.k) + "×" + std::to_string(m.p.k) + " 步长 " +
+        st.summary = (m.p.poolMode == POOL_MAX ? tr("最大池化 ", "Max pooling ") : tr("平均池化 ", "Average pooling ")) +
+                     std::to_string(m.p.k) + "×" + std::to_string(m.p.k) + tr(" 步长 ", " stride ") +
                      std::to_string(m.p.stride);
       } else {
         st.summary = st.outShape;
@@ -625,7 +627,7 @@ RunResult TrainNet::toResult(const NetGraph& g) const {
         st.summary = st.outShape;
       } else if (m.type == MOD_RAND) {
         st.inShape = std::to_string(m.p.units);
-        st.summary = std::to_string(m.p.units) + " 个自生成输入";
+        st.summary = std::to_string(m.p.units) + tr(" 个自生成输入", " random inputs");
       } else if (m.type == MOD_FLAT) {
         const T3& x = y3[up];
         st.inShape = shape3(x.c, x.h, x.w);
@@ -633,10 +635,10 @@ RunResult TrainNet::toResult(const NetGraph& g) const {
       } else if (up >= 0) {
         const int n = static_cast<int>(x1[oi].size());
         st.inShape = std::to_string(n);
-        st.summary = std::to_string(n) + " → " + std::to_string(m.p.units) + " 单元";
+        st.summary = std::to_string(n) + " → " + std::to_string(m.p.units) + tr(" 单元", " units");
       }
     } else {
-      st.err = "这一层没有数据";
+      st.err = tr("这一层没有数据", "This layer has no data");
     }
     res.steps.push_back(std::move(st));
   }
@@ -654,7 +656,7 @@ RunResult TrainNet::toResult(const NetGraph& g) const {
     res.msg = err;
   } else {
     res.ok = false;
-    res.msg = "没有输出层或目标输出元件，无法给出结果";
+    res.msg = tr("没有输出层或目标输出元件，无法给出结果", "No output layer or target-output module; cannot give a result");
   }
   res.totalMs = total;
   return res;

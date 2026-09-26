@@ -101,13 +101,14 @@ foreach ($s in $steps) {
 Say ''
 Say '-- 4. 画布网格直线性 --'
 $py = (Get-Command python.exe -ErrorAction SilentlyContinue).Source
-$home = Join-Path $outDir 'ui\01-home.png'
+# 注意别用 $home 当变量名：PowerShell 里 $HOME 是只读自动变量，赋值会直接报错。
+$homeShot = Join-Path $outDir 'ui\01-home.png'
 if (-not $py) {
   Say '    跳过：没找到 python.exe（这一项要 python + numpy + pillow）' 'Yellow'
-} elseif (-not (Test-Path $home)) {
-  Say "    跳过：缺少截图 $home（上面的界面自检没跑成）" 'Yellow'
+} elseif (-not (Test-Path $homeShot)) {
+  Say "    跳过：缺少截图 $homeShot（上面的界面自检没跑成）" 'Yellow'
 } else {
-  $grid = & $py (Join-Path $root 'tools\grid_check.py') $home 2>&1
+  $grid = & $py (Join-Path $root 'tools\grid_check.py') $homeShot 2>&1
   $grid | ForEach-Object { Add-Content -Path $log -Value $_ -Encoding UTF8 }
   $grid | Select-Object -Last 5 | ForEach-Object { Say "    $_" }
   if ($LASTEXITCODE -ne 0) { Say '    网格里出现了斜线或折线' 'Red'; $bad++ }

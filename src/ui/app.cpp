@@ -17,6 +17,7 @@
 #include "Ops.h"
 #include "Theme.h"
 #include "gpu.h"
+#include "Lang.h"
 
 namespace ui {
 
@@ -107,12 +108,30 @@ bool App::load(const std::string& assetsDir, const std::string& dataDir, std::st
     weights_ = core::parseWeights(mj);
   }
   if (err != nullptr && digits_.items.empty()) {
-    *err = "没有读到示例数字文件（assets/digits.txt）";
+    *err = core::tr("没有读到示例数字文件（assets/digits.txt）", "Could not read the sample digit file (assets/digits.txt)");
   }
 
   storeGraph_ = readFileToString(joinPath(dataDir, "graph.txt"));
   storeLab_ = readFileToString(joinPath(dataDir, "lab.txt"));
   storeTrain_ = readFileToString(joinPath(dataDir, "train.txt"));
+
+  /* 界面语言：上次选的那一份，读不到就用中文 */
+  {
+    const std::string raw = readFileToString(joinPath(dataDir, "lang.txt"));
+    std::string key; /* 只取开头的字母：文件里写的是 zh / en */
+    for (size_t i = 0; i < raw.size(); i++) {
+      const char c = raw[i];
+      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+        key.push_back(c);
+      } else {
+        break;
+      }
+    }
+    core::Lang l = core::LANG_ZH;
+    if (core::parseLang(key, &l)) {
+      core::setLang(l);
+    }
+  }
 
   bool restored = false;
   if (storeGraph_.size() > 10) {
@@ -154,7 +173,7 @@ bool App::load(const std::string& assetsDir, const std::string& dataDir, std::st
   hasResult_ = false;
   refreshTexts();
   fitAll();
-  noteText_ = "左键拖空白即框选，中键拖动平移，滚轮缩放，双击模块看神经元";
+  noteText_ = core::tr("左键拖空白即框选，中键拖动平移，滚轮缩放，双击模块看神经元", "Drag empty space with the left button to marquee select, drag with the middle button to pan, scroll to zoom, double-click a module to see its neurons");
   if (!digits_.items.empty()) {
     runTest(false);
   }
@@ -198,6 +217,32 @@ void App::saveAll() {
   saveTrain();
 }
 
+void App::saveLang() {
+  if (dataDir_.empty()) {
+    return;
+  }
+  writeFileString(joinPath(dataDir_, "lang.txt"), std::string(core::langKey()) + "\n");
+}
+
+/* 中英切换：所有文案都是「当前语言取一份」，所以切完要把已经算好的那几行重算一遍 */
+void App::toggleLang() {
+  core::setLang(core::otherLang(core::lang()));
+  saveLang();
+  refreshTexts();
+  applyLab();
+  if (labDocPage_ > 0) {
+    const int p = labDocPage_;
+    labDocPage_ = 0; /* setDoc 是「点同一页就收起」，先清掉再取一次 */
+    setDoc(p);
+  }
+  updateLoopText();
+  if (innerFor_ >= 0) {
+    refreshInnerText(); /* 内部视图那一行也是算好的文案，要跟着换语言 */
+  }
+  runTest(false);
+  noteText_ = std::string(core::tr("界面语言：", "UI language: ")) + core::langName(core::lang());
+}
+
 /* ---------------- 公式与参数 ---------------- */
 
 void App::applyLab() {
@@ -238,7 +283,7 @@ void App::bumpFreq(double d) {
 void App::setLr(double v) {
   lr_ = core::clampLr(v);
   lab_->cfg.lr = lr_;
-  noteText_ = "学习率 " + trimNum(lr_);
+  noteText_ = core::tr("学习率 ", "Learning rate ") + trimNum(lr_);
   saveLab();
   updateLoopText();
 }
@@ -261,19 +306,19 @@ void App::refreshTexts() {
   std::string t;
   for (size_t i = 0; i < issues.size(); i++) {
     const core::Issue& it = issues[i];
-    const std::string tag = it.level == 2 ? "错误 " : (it.level == 1 ? "提示 " : "");
+    const std::string tag = it.level == 2 ? core::tr("错误 ", "Error ") : (it.level == 1 ? core::tr("提示 ", "Notice ") : "");
     t = t + (i > 0 ? " · " : "") + tag + it.text;
   }
-  statusText_ = t + "  ·  " + std::to_string(graph_.modules.size()) + " 个模块  ·  约 " +
-                std::to_string(core::countParams(graph_)) + " 个参数";
-  zoomText_ = "缩放 " + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
+  statusText_ = t + "  ·  " + std::to_string(graph_.modules.size()) + core::tr(" 个模块  ·  约 ", " modules  ·  about ") +
+                std::to_string(core::countParams(graph_)) + core::tr(" 个参数", " parameters");
+  zoomText_ = core::tr("缩放 ", "Zoom ") + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
   if (sel_.empty()) {
-    selTitle_ = "未选中模块";
-    selSub_ = "在画布上点选模块，这里显示它的参数";
+    selTitle_ = core::tr("未选中模块", "No module selected");
+    selSub_ = core::tr("在画布上点选模块，这里显示它的参数", "Click a module on the canvas to see its parameters here");
     neuronNote_ = "";
   } else if (sel_.size() > 1) {
-    selTitle_ = "已选 " + std::to_string(sel_.size()) + " 个模块";
-    selSub_ = "下方按钮对选中的这几个模块整体生效";
+    selTitle_ = core::tr("已选 ", "Selected ") + std::to_string(sel_.size()) + core::tr(" 个模块", " modules");
+    selSub_ = core::tr("下方按钮对选中的这几个模块整体生效", "The buttons below apply to the selected modules as a whole");
     neuronNote_ = "";
   } else {
     const core::NetModule m = core::gGet(graph_, sel_[0]);
@@ -285,9 +330,13 @@ void App::refreshTexts() {
         shapeText = shapes[i];
       }
     }
-    selTitle_ = m.name + (m.groupId == 0 ? "" : "（" + core::gGroupName(graph_, m.groupId) + "）");
-    selSub_ = core::modTypeName(m.type) + " · " + core::modSummary(m) + " · 输出 " + shapeText +
-              " · " + std::to_string(core::neuronCountFor(m)) + " 个神经元";
+    selTitle_ = core::displayName(m.name) +
+                (m.groupId == 0 ? ""
+                                : core::tr("（", " (") +
+                                      core::displayName(core::gGroupName(graph_, m.groupId)) +
+                                      core::tr("）", ")"));
+    selSub_ = core::modTypeName(m.type) + " · " + core::modSummary(m) + core::tr(" · 输出 ", " · outputs ") + shapeText +
+              " · " + std::to_string(core::neuronCountFor(m)) + core::tr(" 个神经元", " neurons");
     neuronNote_ = core::neuronLockNote(m);
   }
 }
@@ -309,23 +358,34 @@ void App::afterChange() {
   saveGraph();
 }
 
+/*
+ * 循环状态一行 + 顶栏上的小标签。
+ * 一个循环只有两种拍法：开（运行中）与关（暂停），是不是在学由「更新权重」决定，
+ * 所以这里把「每步更新权重 / 只做前向」写出来，不用再靠面板名去区分测试与训练。
+ */
 void App::updateLoopText() {
-  std::string t = loopOn_ ? "训练中 · 目标每秒 " + std::to_string(freq_) + " 步" : "训练已暂停";
-  if (loopOn_ && loopStepMs_ > 0) {
-    t = t + " · 单步 " + std::to_string(loopStepMs_) + " ms";
-  }
-  if (!loopOn_ && labStats_.steps == 0) {
-    t = "尚未开始训练";
+  const bool learning = trainable() && labTrain_;
+  std::string t;
+  if (loopOn_) {
+    t = core::tr("运行中 · 目标每秒 ", "Running · target per second ") + std::to_string(freq_) + core::tr(" 步", " steps");
+    if (loopStepMs_ > 0) {
+      t = t + core::tr(" · 单步 ", " · single step ") + std::to_string(loopStepMs_) + " ms";
+    }
+    t = t + (learning ? core::tr(" · 每步更新权重", " · update weights each step") : core::tr(" · 只做前向", " · forward only"));
+  } else if (labStats_.steps > 0) {
+    t = learning ? core::tr("已暂停 · 每步更新权重", "Paused · update weights each step") : core::tr("已暂停 · 只做前向", "Paused · forward only");
+  } else {
+    t = learning ? core::tr("尚未开始", "Not started") : core::tr("尚未开始 · 只做前向", "Not started · forward only");
   }
   if (labStats_.steps > 0) {
     t = t + "  ·  " + labStats_.summary();
   }
   loopText_ = t;
   if (loopOn_) {
-    loopChip_ = "训练中 · 每秒 " + std::to_string(freq_) + " 步 · 已 " +
-                std::to_string(labStats_.steps) + " 步";
+    loopChip_ = std::string(core::tr("运行中", "Running")) + (learning ? core::tr(" · 训练", " · training") : core::tr(" · 前向", " · forward")) + core::tr(" · 每秒 ", " · at ") +
+                std::to_string(freq_) + core::tr(" 步 · 已 ", " steps/s · done ") + std::to_string(labStats_.steps) + core::tr(" 步", " steps");
   } else if (labStats_.steps > 0) {
-    loopChip_ = "训练已暂停 · 已 " + std::to_string(labStats_.steps) + " 步";
+    loopChip_ = core::tr("已暂停 · 已 ", "Paused · after ") + std::to_string(labStats_.steps) + core::tr(" 步", " steps");
   } else {
     loopChip_.clear();
   }
@@ -360,50 +420,44 @@ void App::syncInputVals() {
   inValHi_ = hi;
 }
 
-void App::testTextsTrainable() {
-  std::string ins;
-  for (size_t i = 0; i < lastInputs_.size() && i < 4; i++) {
-    ins = ins + (i > 0 ? "  " : "") + "输入" + std::to_string(i) + " " + fixed(lastInputs_[i], 3);
-  }
-  std::string outs;
-  for (size_t i = 0; i < result_.probs.size() && i < 4; i++) {
-    outs = outs + (i > 0 ? "  " : "") + "输出" + std::to_string(i) + " " +
-           fixed(result_.probs[i], 3);
-  }
-  std::string tgts;
-  for (size_t i = 0; i < lastTgts_.size() && i < 4; i++) {
-    tgts = tgts + (i > 0 ? "  " : "") + "期望" + std::to_string(i) + " " +
-           fixed(lastTgts_[i], 3);
-  }
-  sampleText_ = "第 " + std::to_string(testSteps_) + " 步（测试）  ·  " + ins + "  →  " + outs +
-                (tgts.empty() ? "" : "  ·  " + tgts);
-  std::string t = lossText_;
-  if (!rewardText_.empty()) {
-    t = t + (t.empty() ? "" : "  ·  ") + rewardText_;
-  }
-  probText_ = t;
-}
-
+/*
+ * 把这一拍整理成面板上的两行：
+ *   示例一行：默认输入时说清用的是哪张手写数字；自定义输入时给出这一拍的输入与输出；
+ *   输出一行：输出值/概率、期望输出、损失与奖励。
+ * 两行都跟着「最近一次前向」走，所以循环在跑的时候它们是活的。
+ */
 void App::updateRunTexts() {
   if (!hasResult_) {
     return;
   }
-  if (netOn_) {
-    testTextsTrainable();
-    return;
-  }
   stepIdx_ = core::stepClamp(static_cast<int>(result_.steps.size()), stepIdx_);
   stepText_ = core::layerLine(result_, stepIdx_);
-  if (!digits_.items.empty()) {
-    const core::Digit& d = digits_.items[sampleIdx_ % digits_.items.size()];
+
+  const core::NetModule inM = inputModule();
+  const int n = static_cast<int>(digits_.items.size());
+  std::string head = core::tr("第 ", "At ") + std::to_string(loopSteps_) + core::tr(" 步", " steps");
+  if (inM.id >= 0 && !customInput() && n > 0) {
+    const int k = ((sampleIdx_ % n) + n) % n;
+    const core::Digit& d = digits_.items[k];
     const bool hit = result_.argmax == d.label;
-    sampleText_ = "示例 " + std::to_string(sampleIdx_ + 1) + "/" +
-                  std::to_string(digits_.items.size()) + " " + d.name + " · 真实数字 " +
-                  std::to_string(d.label) + " · 网络判定 " + std::to_string(result_.argmax) +
-                  (hit ? " 正确" : " 与真实不同");
+    head = head + core::tr(" · 示例 ", " · sample ") + std::to_string(k + 1) + "/" + std::to_string(n) + " " + d.name +
+           core::tr(" · 真实数字 ", " · true digit ") + std::to_string(d.label) + core::tr(" · 网络判定 ", " · network prediction ") +
+           std::to_string(result_.argmax) + (hit ? core::tr(" 正确", " correct") : core::tr(" 与真实不同", " differs from true digit"));
   } else {
-    sampleText_ = "未加载示例文件";
+    std::string ins;
+    for (size_t i = 0; i < lastInputs_.size() && i < 4; i++) {
+      ins = ins + (i > 0 ? "  " : "") + fixed(lastInputs_[i], 3);
+    }
+    std::string outs;
+    for (size_t i = 0; i < result_.probs.size() && i < 4; i++) {
+      outs = outs + (i > 0 ? "  " : "") + fixed(result_.probs[i], 3);
+    }
+    head = head + (ins.empty() ? "" : core::tr(" · 输入 ", " · input ") + ins) +
+           (outs.empty() ? "" : core::tr(" → 输出 ", " -> output ") + outs);
   }
+  sampleText_ = head;
+
+  std::string t;
   if (!result_.probs.empty()) {
     std::vector<int> idx;
     for (size_t i = 0; i < result_.probs.size(); i++) {
@@ -412,18 +466,31 @@ void App::updateRunTexts() {
     std::stable_sort(idx.begin(), idx.end(),
                      [this](int a, int b) { return result_.probs[a] > result_.probs[b]; });
     const bool asProb = core::isDefaultOut(lab_->cfg);
-    std::string t = asProb ? "输出概率：" : "输出值：";
+    t = asProb ? core::tr("输出概率：", "Output probability: ") : core::tr("输出值：", "Output values: ");
     for (size_t i = 0; i < idx.size() && i < 4; i++) {
       if (asProb) {
-        t = t + "  " + std::to_string(idx[i]) + " 类 " + fixed(result_.probs[idx[i]] * 100, 1) + "%";
+        t = t + "  " + std::to_string(idx[i]) + core::tr(" 类 ", " -> ") + fixed(result_.probs[idx[i]] * 100, 1) + "%";
       } else {
-        t = t + "  " + std::to_string(idx[i]) + " 类 " + fixed(result_.probs[idx[i]], 3);
+        t = t + "  " + std::to_string(idx[i]) + core::tr(" 类 ", " -> ") + fixed(result_.probs[idx[i]], 3);
       }
     }
-    probText_ = t + (rewardText_.empty() ? "" : "  ·  " + rewardText_);
   } else {
-    probText_ = "没有输出层，无法给出类别结果";
+    t = core::tr("没有输出层，无法给出类别结果", "No output layer, so no class result can be given");
   }
+  std::string tgts;
+  for (size_t i = 0; i < lastTgts_.size() && i < 4; i++) {
+    tgts = tgts + (i > 0 ? "  " : "") + fixed(lastTgts_[i], 3);
+  }
+  if (!tgts.empty()) {
+    t = t + core::tr("  ·  期望 ", "  ·  expected ") + tgts;
+  }
+  if (!lossText_.empty()) {
+    t = t + "  ·  " + lossText_;
+  }
+  if (!rewardText_.empty()) {
+    t = t + "  ·  " + rewardText_;
+  }
+  probText_ = t;
 }
 
 /* ---------------- 可训练路径 ---------------- */
@@ -437,6 +504,8 @@ bool App::needTrain() const {
   }
   return false;
 }
+
+bool App::trainable() const { return needTrain(); }
 
 void App::ensureNet() {
   const std::string fp = std::to_string(core::gFingerprint(graph_));
@@ -474,7 +543,7 @@ void App::resetNet() {
   runTest(false);
   trainText_.clear();
   updateLoopText();
-  noteText_ = "神经网络已重置：权重回到初始值，训练记录与曲线已清空";
+  noteText_ = core::tr("神经网络已重置：权重回到初始值，训练记录与曲线已清空", "Network has been reset: weights are back to their initial values, and the training records and curves are cleared");
 }
 
 void App::reroll() {
@@ -487,8 +556,8 @@ void App::reroll() {
       n = n + 1;
     }
   }
-  noteText_ = n > 0 ? "已重新随机 " + std::to_string(n) + " 个自生成输入"
-                    : "选中的模块里没有自生成输入";
+  noteText_ = n > 0 ? core::tr("已重新随机 ", "Rerolled ") + std::to_string(n) + core::tr(" 个自生成输入", " random inputs")
+                    : core::tr("选中的模块里没有自生成输入", "The selected modules contain no random input");
   afterChange();
   saveTrain();
 }
@@ -527,7 +596,13 @@ void App::finalizeStep(core::StepScore& sc) {
   result_.argmax = sc.pred;
 }
 
-core::RunResult App::forwardOnce(bool update, int t, int k, bool publishTestFlag) {
+/*
+ * 一次前向：算出这一拍的输出与得分，再把结果交给面板。
+ *   update  = true 表示按学习率更新权重（只有结构可训练时才真的更新）；
+ *   counted = true 表示这是循环或「单步」真正走的一拍：计入统计与奖励曲线；
+ *             false 表示只是看一眼（切换示例、结构变化后重测）：不改权重、也不计入统计。
+ */
+core::RunResult App::forwardOnce(bool update, int t, int k, bool counted) {
   const std::vector<double> px = samplePixels(k);
   core::LabEnv& env = *lab_;
   const core::NetModule inM = inputModule();
@@ -538,10 +613,13 @@ core::RunResult App::forwardOnce(bool update, int t, int k, bool publishTestFlag
   env.start(t, k, label, static_cast<int>(digits_.items.size()), inC, inH, inW, px,
             digits_.size);
   netOn_ = needTrain();
+  bool updatedWeights = false;
   core::RunResult res;
   std::vector<double> tgt;
   bool hasTgt = false;
   std::vector<double> inputs;
+  /* 网络侧留下的提醒（结构不完整、梯度非有限值这类），最后并进 labNote_ */
+  std::string netWarn;
   if (netOn_) {
     /* 可训练路径：自生成输入 / 目标输出奖励这类元件要靠它算 */
     ensureNet();
@@ -564,14 +642,17 @@ core::RunResult App::forwardOnce(bool update, int t, int k, bool publishTestFlag
     const std::vector<double> y = net_.forward(graph_, t, &srcFn);
     inputs = net_.sourceVec();
     if (!net_.err.empty()) {
-      labNote_ = net_.err;
+      netWarn = net_.err;
     }
     tgt = env.targets(y, inputs);
     hasTgt = true;
     if (update) {
       net_.zeroGrad();
       net_.backward(graph_, core::mseGrad(y, tgt));
-      net_.applyLr(lr_);
+      updatedWeights = net_.applyLr(lr_);
+      if (!updatedWeights && !net_.err.empty() && netWarn.empty()) {
+        netWarn = net_.err;
+      }
     }
     res = net_.toResult(graph_);
   } else {
@@ -592,72 +673,100 @@ core::RunResult App::forwardOnce(bool update, int t, int k, bool publishTestFlag
   result_.probs = sc.outVals;
   const std::string runErr = env.runErr();
   if (!runErr.empty()) {
-    labNote_ = "表达式求值出错：" + runErr;
+    labNote_ = core::tr("表达式求值出错：", "Expression error: ") + runErr;
   } else if (!env.msg.empty()) {
     labNote_ = env.msg;
+  } else if (!netWarn.empty()) {
+    labNote_ = netWarn;
   } else {
     labNote_.clear();
   }
-  if (publishTestFlag) {
-    /* 测试循环：把这一步的结果交给测试视图 */
-    fixStepIdx();
-    syncInputVals();
-    std::string weightText = "结构与示例网络不一致，权重按结构生成，只做前向计算";
-    if (netOn_) {
-      weightText = update ? "每步按学习率更新权重" : "使用当前训练权重（测试不改权重）";
-    } else if (res.pretrained) {
-      weightText = "使用自带的预训练参数（示例网络）";
-    }
-    if (result_.steps.empty()) {
-      runSummary_ = "画布上没有可运行的层" + (result_.msg.empty() ? "" : " · " + result_.msg);
-    } else {
-      runSummary_ = std::to_string(result_.steps.size()) + " 层 · 用时 " +
-                    std::to_string(result_.totalMs) + " ms · " +
-                    (result_.ok ? "运行正常" : result_.msg) + " · " + weightText;
-    }
+  if (counted) {
+    /* 真正走的一拍：计入统计与奖励曲线 */
     if (sc.n > 0) {
-      rewardText_ = "本步奖励 " + fixed(sc.reward, 2);
-      lossText_ = lastTgts_.empty()
-                      ? ""
-                      : "损失 " + fixed(sc.loss, 4) + " · 平均绝对误差 " + fixed(sc.mae, 4);
-    } else {
-      rewardText_.clear();
-      lossText_.clear();
+      labStats_.add(sc.reward, sc.hit);
+      pushCurve(sc.score);
     }
-    updateRunTexts();
-    return result_;
   }
-  /* 训练循环：只推进训练面板的进度、统计与曲线 */
-  if (sc.n == 0) {
-    trainText_ = "画布上没有可运行的层";
-    return result_;
-  }
-  labStats_.add(sc.reward, sc.hit);
-  pushCurve(sc.score);
-  std::string line = "第 " + std::to_string(t + 1) + " 步 · 奖励 " + fixed(sc.reward, 2);
-  if (!lastTgts_.empty()) {
-    line = line + " · 损失 " + fixed(sc.loss, 4) + " · 平均绝对误差 " + fixed(sc.mae, 4);
-  }
-  if (!labTrain_) {
-    line = line + " · 权重未更新";
-  }
-  trainText_ = line;
-  if (labTrain_) {
-    evalText_.clear();
-  }
+  publishStepViews(counted, sc, t, k, updatedWeights);
   return result_;
 }
 
-/* ---------------- 测试循环 ---------------- */
+/*
+ * 把这一拍的结果发布到面板：概览一行、得分、本步说明、示例与输出两行、循环状态。
+ * counted=false（预览）时只刷新画面，不动统计、也不动权重。
+ */
+void App::publishStepViews(bool counted, const core::StepScore& sc, int t, int k,
+                           bool updatedWeights) {
+  const int n = static_cast<int>(digits_.items.size());
+  if (n > 0) {
+    /* 面板上的示例、热力图与预览始终是同一张图 */
+    sampleIdx_ = ((k % n) + n) % n;
+  }
+  fixStepIdx();
+  syncInputVals();
+
+  /* 这一拍用的是哪套权重：说清楚，免得「怎么不变」的疑惑 */
+  std::string weightText = core::tr("结构与示例网络不一致，权重按结构生成，只做前向计算", "The structure differs from the example network, so weights are generated from the structure and only the forward pass runs");
+  if (netOn_) {
+    weightText = updatedWeights ? core::tr("每步按学习率 ", "each step: learning rate ") + trimNum(lr_) + core::tr(" 更新权重", " updates weights")
+                                : core::tr("使用当前权重（这一步只做前向）", "Using the current weights (forward pass only this step)");
+  } else if (result_.pretrained) {
+    weightText = core::tr("使用自带的预训练参数（示例网络）", "Using the built-in pretrained parameters (example network)");
+  }
+  if (result_.steps.empty()) {
+    runSummary_ = core::tr("画布上没有可运行的层", "No runnable layer on the canvas") + (result_.msg.empty() ? "" : " · " + result_.msg);
+  } else {
+    runSummary_ = std::to_string(result_.steps.size()) + core::tr(" 层 · 用时 ", " layers · took ") +
+                  std::to_string(result_.totalMs) + " ms · " +
+                  (result_.ok ? core::tr("运行正常", "ran fine") : result_.msg) + " · " + weightText;
+  }
+
+  /* 这一拍的得分 */
+  if (sc.n > 0) {
+    rewardText_ = core::tr("本步奖励 ", "Step reward ") + fixed(sc.reward, 2);
+    lossText_ = lastTgts_.empty()
+                    ? ""
+                    : core::tr("损失 ", "Loss ") + fixed(sc.loss, 4) + core::tr(" · 平均绝对误差 ", " · mean absolute error ") + fixed(sc.mae, 4);
+  } else {
+    rewardText_.clear();
+    lossText_.clear();
+  }
+
+  /* 本步做了什么：一眼看出「这一步到底有没有在学」 */
+  if (!counted) {
+    trainText_ = core::tr("预览前向：不改权重，也不计入统计", "Preview forward pass: does not change weights and is not counted in the stats");
+  } else if (updatedWeights) {
+    trainText_ = core::tr("本步已按学习率 ", "This step: learning rate ") + trimNum(lr_) + core::tr(" 更新权重", " updates weights");
+  } else if (!netOn_) {
+    trainText_ = core::tr("本步只做前向：当前结构没有可训练的层（加自生成输入或目标输出元件才会训练）", "Forward pass only this step: the current structure has no trainable layer (training starts once you add a random input or a target-output element)");
+  } else if (!labTrain_) {
+    trainText_ = core::tr("本步只做前向：更新权重已关", "Forward pass only this step: update weights is off");
+  } else {
+    trainText_ = core::tr("本步只做前向（这一拍没有走反向传播）", "Forward pass only this step (no backpropagation ran this step)");
+  }
+
+  if (counted && labTrain_ && netOn_) {
+    /* 权重变了，上一次的评估结论不再成立 */
+    evalText_.clear();
+  }
+  if (sc.n == 0) {
+    trainText_ = core::tr("画布上没有可运行的层", "No runnable layer on the canvas");
+  }
+  updateLoopText();
+  updateRunTexts();
+}
+
+/* ---------------- 看一次（不改权重、不计入统计） ---------------- */
 
 void App::runTest(bool open) {
-  testSteps_ = testSteps_ + 1;
-  forwardOnce(false, testSteps_, sampleIdx_, true);
+  forwardOnce(false, loopSteps_, sampleIdx_, false);
   stepIdx_ = 1;
   fixStepIdx();
   updateRunTexts();
   if (open) {
-    panel_ = PANEL_TEST;
+    panel_ = PANEL_RUN;
+    panelScroll_ = 0; /* 每次打开都从面板顶部开始 */
   }
 }
 
@@ -668,11 +777,11 @@ void App::evaluateAll() {
   }
   const int total = static_cast<int>(digits_.items.size());
   if (total == 0) {
-    evalText_ = "未加载示例文件，无法评估";
+    evalText_ = core::tr("未加载示例文件，无法评估", "No sample file loaded, cannot evaluate");
     return;
   }
   if (core::gOrder(graph_).empty()) {
-    evalText_ = "画布上没有可运行的模块，无法评估";
+    evalText_ = core::tr("画布上没有可运行的模块，无法评估", "No runnable module on the canvas, cannot evaluate");
     return;
   }
   core::LabEnv& env = *lab_;
@@ -712,17 +821,17 @@ void App::evaluateAll() {
         if (sc.hit) {
           okGpu = okGpu + 1;
         } else if (mismGpu.size() < 40) {
-          mismGpu = mismGpu + (mismGpu.empty() ? "" : "、") + d.name + "(真 " +
-                    std::to_string(d.label) + " 判 " + std::to_string(sc.pred) + ")";
+          mismGpu = mismGpu + (mismGpu.empty() ? "" : core::tr("、", ", ")) + d.name + core::tr("(真 ", "(true ") +
+                    std::to_string(d.label) + core::tr(" 判 ", " predicted ") + std::to_string(sc.pred) + ")";
         }
       }
-      std::string tg = "自带示例 " + std::to_string(total) + " 个手写数字：识别正确 " +
-                       std::to_string(okGpu) + "/" + std::to_string(total) + "，合计 " +
-                       fixed(b.ms, 1) + " ms  ·  计算后端 " + b.backend +
-                       "（批量一次算完）  ·  按当前奖励函数的平均奖励 " +
+      std::string tg = core::tr("自带示例 ", "Built-in samples: ") + std::to_string(total) + core::tr(" 个手写数字：识别正确 ", " handwritten digits: correct ") +
+                       std::to_string(okGpu) + "/" + std::to_string(total) + core::tr("，合计 ", ", total ") +
+                       fixed(b.ms, 1) + core::tr(" ms  ·  计算后端 ", " ms  ·  compute backend ") + b.backend +
+                       core::tr("（批量一次算完）  ·  按当前奖励函数的平均奖励 ", " (all in one batch)  ·  mean reward of the current reward function ") +
                        fixed(rewardGpu / total, 2);
       if (!mismGpu.empty()) {
-        tg = tg + "；不符的样本：" + mismGpu;
+        tg = tg + core::tr("；不符的样本：", "; mismatches: ") + mismGpu;
       }
       evalText_ = tg;
       return;
@@ -748,21 +857,21 @@ void App::evaluateAll() {
     if (sc.hit) {
       ok = ok + 1;
     } else if (mismatch.size() < 40) {
-      mismatch = mismatch + (mismatch.empty() ? "" : "、") + d.name + "(真 " +
-                 std::to_string(d.label) + " 判 " + std::to_string(sc.pred) + ")";
+      mismatch = mismatch + (mismatch.empty() ? "" : core::tr("、", ", ")) + d.name + core::tr("(真 ", "(true ") +
+                 std::to_string(d.label) + core::tr(" 判 ", " predicted ") + std::to_string(sc.pred) + ")";
     }
   }
   const int ms = static_cast<int>(static_cast<int64_t>(std::clock()) - t0) * 1000 /
                  static_cast<int>(CLOCKS_PER_SEC);
-  std::string t = "自带示例 " + std::to_string(total) + " 个手写数字：识别正确 " +
-                  std::to_string(ok) + "/" + std::to_string(total) + "，合计 " +
-                  std::to_string(ms) + " ms  ·  计算后端 CPU 逐张";
+  std::string t = core::tr("自带示例 ", "Built-in samples: ") + std::to_string(total) + core::tr(" 个手写数字：识别正确 ", " handwritten digits: correct ") +
+                  std::to_string(ok) + "/" + std::to_string(total) + core::tr("，合计 ", ", total ") +
+                  std::to_string(ms) + core::tr(" ms  ·  计算后端 CPU 逐张", " ms  ·  compute backend CPU, one by one");
   if (!gpuWhy.empty()) {
-    t = t + "（" + gpuWhy + "）";
+    t = t + core::tr("（", " (") + gpuWhy + core::tr("）", ")");
   }
-  t = t + "  ·  按当前奖励函数的平均奖励 " + fixed(rewardSum / total, 2);
+  t = t + core::tr("  ·  按当前奖励函数的平均奖励 ", "  ·  mean reward of the current reward function ") + fixed(rewardSum / total, 2);
   if (!mismatch.empty()) {
-    t = t + "；不符的样本：" + mismatch;
+    t = t + core::tr("；不符的样本：", "; mismatches: ") + mismatch;
   }
   evalText_ = t;
 }
@@ -809,32 +918,43 @@ void App::evaluateTrain() {
   }
   const int ms = static_cast<int>(static_cast<int64_t>(std::clock()) - t0) * 1000 /
                  static_cast<int>(CLOCKS_PER_SEC);
-  evalText_ = "没训过的随机输入 " + std::to_string(total) + " 组：平均得分 " +
-              fixed(scoreSum / total, 3) + " · 平均损失 " + fixed(lossSum / total, 4) +
-              " · 命中 " + std::to_string(hits) + "/" + std::to_string(total) + " · 合计 " +
+  evalText_ = core::tr("没训过的随机输入 ", "Untrained random inputs ") + std::to_string(total) + core::tr(" 组：平均得分 ", " sets: mean score ") +
+              fixed(scoreSum / total, 3) + core::tr(" · 平均损失 ", " · mean loss ") + fixed(lossSum / total, 4) +
+              core::tr(" · 命中 ", " · hits ") + std::to_string(hits) + "/" + std::to_string(total) + core::tr(" · 合计 ", " · total ") +
               std::to_string(ms) + " ms";
 }
 
-/* ---------------- 训练循环 ---------------- */
+/* ---------------- 运行循环 ---------------- */
+
+/* 走一拍：按「更新权重」开关决定这一拍学不学；走完把示例游标往前挪一个 */
+void App::trainStep() {
+  forwardOnce(labTrain_, loopSteps_, sampleIdx_, true);
+  loopSteps_ = loopSteps_ + 1;
+  const int n = static_cast<int>(digits_.items.size());
+  if (n > 0) {
+    sampleIdx_ = (sampleIdx_ + 1) % n;
+  }
+}
 
 void App::startLoop() {
   if (loopOn_) {
     return;
   }
   if (digits_.items.empty()) {
-    noteText_ = "没有可用的示例输入";
+    noteText_ = core::tr("没有可用的示例输入", "No sample input available");
     refreshTexts();
     return;
   }
   if (core::gOrder(graph_).empty()) {
-    noteText_ = "画布上没有可运行的模块，训练没有开始";
+    noteText_ = core::tr("画布上没有可运行的层，循环没有开始", "No runnable layer on the canvas, so the loop did not start");
     refreshTexts();
     return;
   }
   loopOn_ = true;
   loopStepMs_ = 0;
   waitMs_ = 0;
-  noteText_ = "训练循环已开始 · 目标每秒 " + std::to_string(freq_) + " 步";
+  noteText_ = core::tr("循环已开始 · 目标每秒 ", "Loop started · target per second ") + std::to_string(freq_) + core::tr(" 步", " steps") +
+              (trainable() && labTrain_ ? core::tr(" · 每步更新权重", " · update weights each step") : core::tr(" · 只做前向", " · forward only"));
   updateLoopText();
 }
 
@@ -842,7 +962,7 @@ void App::stopLoop() {
   const bool was = loopOn_;
   loopOn_ = false;
   if (was) {
-    noteText_ = "训练已暂停 · 已跑 " + std::to_string(labStats_.steps) + " 步";
+    noteText_ = core::tr("循环已暂停 · 已跑 ", "Loop paused · ran ") + std::to_string(labStats_.steps) + core::tr(" 步", " steps");
   }
   saveTrain();
   updateLoopText();
@@ -856,15 +976,6 @@ void App::toggleLoop() {
   }
 }
 
-void App::trainStep() {
-  forwardOnce(labTrain_, loopSteps_, trainIdx_, false);
-  loopSteps_ = loopSteps_ + 1;
-  const int n = static_cast<int>(digits_.items.size());
-  if (n > 0) {
-    trainIdx_ = (trainIdx_ + 1) % n;
-  }
-}
-
 int App::loopTick() {
   if (!loopOn_) {
     return -1;
@@ -872,9 +983,9 @@ int App::loopTick() {
   const int64_t t0 = static_cast<int64_t>(std::clock());
   trainStep();
   if (result_.steps.empty()) {
-    /* 画布上已经没有能跑的东西了，把训练停下来，别空转 */
+    /* 画布上已经没有能跑的东西了，把循环停下来，别空转 */
     stopLoop();
-    noteText_ = "画布上没有可运行的模块，训练已停";
+    noteText_ = core::tr("画布上没有可运行的层，循环已停", "No runnable layer on the canvas, the loop has stopped");
     return -1;
   }
   loopStepMs_ = static_cast<int>((static_cast<int64_t>(std::clock()) - t0) * 1000 /
@@ -888,11 +999,18 @@ int App::loopTick() {
 }
 
 void App::stepOnce() {
-  if (loopOn_ || digits_.items.empty()) {
+  if (digits_.items.empty()) {
+    noteText_ = core::tr("没有可用的示例输入", "No sample input available");
+    refreshTexts();
+    return;
+  }
+  if (loopOn_) {
+    noteText_ = core::tr("循环正在跑，先「暂停」再单步", "The loop is running: press \"Pause\" first, then single step");
+    refreshTexts();
     return;
   }
   if (core::gOrder(graph_).empty()) {
-    noteText_ = "画布上没有可运行的模块，这一步没有执行";
+    noteText_ = core::tr("画布上没有可运行的层，这一步没有执行", "No runnable layer on the canvas, so this step did not run");
     refreshTexts();
     return;
   }
@@ -951,8 +1069,8 @@ void App::addFromLibrary(int entryIndex) {
   core::gMoveIds(graph_, created, cx - first.x, cy - first.y, core::GRID_STEP);
   sel_ = created;
   panel_ = PANEL_NONE;
-  noteText_ = "已添加「" + it.title + "」，共 " + std::to_string(created.size()) + " 个模块" +
-              (preset ? "，公式已按示例设好" : "");
+  noteText_ = core::tr("已添加「", "Added \"") + it.title + core::tr("」，共 ", "\", ") + std::to_string(created.size()) + core::tr(" 个模块", " modules") +
+              (preset ? core::tr("，公式已按示例设好", " (formula preset from the sample)") : "");
   afterChange();
   if (preset) {
     hasResult_ = false;
@@ -963,21 +1081,23 @@ void App::addFromLibrary(int entryIndex) {
 void App::deleteSel() {
   const int n = core::gRemoveIds(graph_, sel_);
   sel_.clear();
-  noteText_ = "已删除 " + std::to_string(n) + " 个模块";
+  noteText_ = core::tr("已删除 ", "Deleted ") + std::to_string(n) + core::tr(" 个模块", " modules");
   afterChange();
 }
 
 void App::duplicateSel() {
   const std::vector<int> ids = core::gDuplicateIds(graph_, sel_, 40, 60);
   sel_ = ids;
-  noteText_ = "已复制 " + std::to_string(ids.size()) + " 个模块";
+  noteText_ = core::tr("已复制 ", "Copied ") + std::to_string(ids.size()) + core::tr(" 个模块", " modules");
   afterChange();
 }
 
 void App::groupSel() {
   if (sel_.size() >= 2) {
-    core::gGroup(graph_, sel_, core::modTypeName(core::gGet(graph_, sel_[0]).type) + "组合");
-    noteText_ = "已把 " + std::to_string(sel_.size()) + " 个模块成组";
+    /* 组名按「存档用的类型名 + 组合」起，与界面语言无关；显示时再按语言映射 */
+    core::gGroup(graph_, sel_,
+                 std::string(core::modTypeNameKey(core::gGet(graph_, sel_[0]).type)) + "组合");
+    noteText_ = core::tr("已把 ", "Grouped ") + std::to_string(sel_.size()) + core::tr(" 个模块成组", " modules into a group");
     afterChange();
   }
 }
@@ -989,7 +1109,7 @@ void App::ungroupSel() {
       core::gUngroup(graph_, m.groupId);
     }
   }
-  noteText_ = "已解组";
+  noteText_ = core::tr("已解组", "Ungrouped");
   afterChange();
 }
 
@@ -998,7 +1118,7 @@ void App::arrangeAll() {
   core::gAutoConnect(graph_);
   core::gArrange(graph_, 60, 0, 0);
   vp_.fitAll(graph_, canvasW_, canvasH_, 40);
-  noteText_ = "已按左右顺序连线并排整齐";
+  noteText_ = core::tr("已按左右顺序连线并排整齐", "Linked and arranged left to right");
   afterChange();
 }
 
@@ -1007,7 +1127,7 @@ void App::resetToExample() {
   sel_.clear();
   vp_.fitAll(graph_, canvasW_, canvasH_, 40);
   hasResult_ = false;
-  noteText_ = "已恢复示例网络";
+  noteText_ = core::tr("已恢复示例网络", "Example network restored");
   afterChange();
   if (!digits_.items.empty()) {
     runTest(false);
@@ -1016,7 +1136,7 @@ void App::resetToExample() {
 
 void App::fitAll() {
   vp_.fitAll(graph_, canvasW_, canvasH_, 40);
-  zoomText_ = "缩放 " + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
+  zoomText_ = core::tr("缩放 ", "Zoom ") + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
 }
 
 void App::openInner() {
@@ -1031,8 +1151,8 @@ void App::openInner() {
 
 void App::refreshInnerText() {
   const core::NetModule m = core::gGet(graph_, innerFor_);
-  innerText_ = m.name + " · " + std::to_string(core::neuronCountFor(m)) + " 个神经元 · 已选 " +
-               std::to_string(innerSel_.size()) + " 个" +
+  innerText_ = core::displayName(m.name) + " · " + std::to_string(core::neuronCountFor(m)) + core::tr(" 个神经元 · 已选 ", " neurons, ") +
+               std::to_string(innerSel_.size()) + core::tr(" 个", " selected") +
                (core::neuronEditable(m) ? "" : " · " + core::neuronLockNote(m));
 }
 
@@ -1044,7 +1164,7 @@ void App::deleteNeurons() {
   const int n = core::removeNeurons(*m, innerSel_);
   innerSel_.clear();
   refreshInnerText();
-  noteText_ = "已删除 " + std::to_string(n) + " 个神经元";
+  noteText_ = core::tr("已删除 ", "Deleted ") + std::to_string(n) + core::tr(" 个神经元", " neurons");
   afterChange();
 }
 
@@ -1106,26 +1226,26 @@ std::vector<std::string> App::paramKeys() const {
 }
 
 std::string App::paramLabel(const std::string& key) const {
-  if (key == "freq") return "循环频率";
-  if (key == "lr") return "学习率";
-  if (key == "train") return "更新权重";
-  if (key == "outs") return "输出个数";
-  if (key == "channels") return "卷积核个数";
-  if (key == "k") return "窗口边长";
-  if (key == "stride") return "步长";
-  if (key == "pad") return "边缘填充";
-  if (key == "units") return "神经元个数";
-  if (key == "act") return "激活函数";
-  if (key == "poolMode") return "池化方式";
-  if (key == "inH") return "输入高度";
-  if (key == "inW") return "输入宽度";
+  if (key == "freq") return core::tr("循环频率", "Loop frequency");
+  if (key == "lr") return core::tr("学习率", "Learning rate");
+  if (key == "train") return core::tr("更新权重", "Update weights");
+  if (key == "outs") return core::tr("输出个数", "Outputs");
+  if (key == "channels") return core::tr("卷积核个数", "Kernels");
+  if (key == "k") return core::tr("窗口边长", "Window size");
+  if (key == "stride") return core::tr("步长", "Stride");
+  if (key == "pad") return core::tr("边缘填充", "Padding");
+  if (key == "units") return core::tr("神经元个数", "Units");
+  if (key == "act") return core::tr("激活函数", "Activation");
+  if (key == "poolMode") return core::tr("池化方式", "Pooling mode");
+  if (key == "inH") return core::tr("输入高度", "Input height");
+  if (key == "inW") return core::tr("输入宽度", "Input width");
   return key;
 }
 
 std::string App::paramValue(const std::string& key) const {
-  if (key == "freq") return std::to_string(freq_) + " 步/秒";
+  if (key == "freq") return std::to_string(freq_) + core::tr(" 步/秒", " steps/s");
   if (key == "lr") return trimNum(lr_);
-  if (key == "train") return labTrain_ ? "开" : "关";
+  if (key == "train") return labTrain_ ? core::tr("开", "On") : core::tr("关", "Off");
   if (sel_.empty()) return "-";
   const core::NetModule m = core::gGet(graph_, sel_[0]);
   if (key == "outs") return std::to_string(m.p.units);
@@ -1135,26 +1255,26 @@ std::string App::paramValue(const std::string& key) const {
   if (key == "pad") return std::to_string(m.p.pad);
   if (key == "units") return std::to_string(m.p.units);
   if (key == "act") return core::actName(m.p.act);
-  if (key == "poolMode") return m.p.poolMode == core::POOL_MAX ? "最大池化" : "平均池化";
+  if (key == "poolMode") return m.p.poolMode == core::POOL_MAX ? core::tr("最大池化", "Max pooling") : core::tr("平均池化", "Average pooling");
   if (key == "inH") return std::to_string(m.p.inH);
   if (key == "inW") return std::to_string(m.p.inW);
   return "-";
 }
 
 std::string App::paramRange(const std::string& key) const {
-  if (key == "freq") return std::to_string(core::FREQ_MIN) + "~" + std::to_string(core::FREQ_MAX) + " 步/秒";
+  if (key == "freq") return std::to_string(core::FREQ_MIN) + "~" + std::to_string(core::FREQ_MAX) + core::tr(" 步/秒", " steps/s");
   if (key == "lr") {
-    return trimNum(core::LIM_LR_MIN) + "~" + trimNum(core::LIM_LR_MAX) + "（－ 减半，＋ 加倍）";
+    return trimNum(core::LIM_LR_MIN) + "~" + trimNum(core::LIM_LR_MAX) + core::tr("（－ 减半，＋ 加倍）", " (- halves, + doubles)");
   }
-  if (key == "train") return "开 = 每步更新权重，关 = 只看前向";
+  if (key == "train") return core::tr("开 = 每步更新权重，关 = 只看前向", "On = update weights each step, Off = forward pass only");
   if (key == "outs") return std::to_string(core::LIM_UNITS_MIN) + "~" + std::to_string(core::LIM_CLASS_MAX);
   if (key == "channels") return std::to_string(core::LIM_CH_MIN) + "~" + std::to_string(core::LIM_CH_MAX);
   if (key == "k") return std::to_string(core::LIM_K_MIN) + "~" + std::to_string(core::LIM_K_MAX);
   if (key == "stride") return std::to_string(core::LIM_STRIDE_MIN) + "~" + std::to_string(core::LIM_STRIDE_MAX);
   if (key == "pad") return std::to_string(core::LIM_PAD_MIN) + "~" + std::to_string(core::LIM_PAD_MAX);
   if (key == "units") return std::to_string(core::LIM_UNITS_MIN) + "~" + std::to_string(core::LIM_UNITS_MAX);
-  if (key == "act") return "线性/ReLU/Sigmoid/Tanh/Softmax";
-  if (key == "poolMode") return "最大/平均";
+  if (key == "act") return core::tr("线性/ReLU/Sigmoid/Tanh/Softmax", "Linear/ReLU/Sigmoid/Tanh/Softmax");
+  if (key == "poolMode") return core::tr("最大/平均", "Max/average");
   if (key == "inH" || key == "inW") return std::to_string(core::LIM_IN_MIN) + "~" + std::to_string(core::LIM_IN_MAX);
   return "";
 }
@@ -1171,7 +1291,7 @@ void App::bumpParam(const std::string& key, double d) {
   if (key == "train") {
     labTrain_ = !labTrain_;
     lab_->cfg.train = labTrain_;
-    noteText_ = labTrain_ ? "每步更新权重" : "已关闭权重更新，只看前向";
+    noteText_ = labTrain_ ? core::tr("每步更新权重", "Update weights each step") : core::tr("已关闭权重更新，只看前向", "Weight updates off, forward pass only");
     saveLab();
     updateLoopText();
     return;
@@ -1221,7 +1341,7 @@ void App::dispatch(const std::string& a) {
   if (a == "cudaToggle") {
     /* 界面上的显卡开关：关掉就整条链路回退 CPU（算子层自己会回退，语义不变） */
     gpu::setEnabled(!gpu::enabled());
-    noteText_ = gpu::enabled() ? "已开启显卡计算" : "已关闭显卡计算，改在 CPU 上算";
+    noteText_ = gpu::enabled() ? core::tr("已开启显卡计算", "GPU acceleration enabled") : core::tr("已关闭显卡计算，改在 CPU 上算", "GPU acceleration disabled, computing on CPU");
     evalText_.clear();
     afterChange();
     return;
@@ -1255,10 +1375,13 @@ void App::dispatch(const std::string& a) {
     arrangeAll();
   } else if (a == "autolink") {
     core::gAutoConnect(graph_);
-    noteText_ = "已按左右顺序自动连线";
+    noteText_ = core::tr("已按左右顺序自动连线", "Auto-linked in left-to-right order");
     afterChange();
   } else if (a == "reset") {
     resetToExample();
+  } else if (a == "lang") {
+    /* 界面语言：中文 ↔ English（存在应用数据目录里，下次打开照上次的来） */
+    toggleLang();
   } else if (a == "fit") {
     fitAll();
   } else if (a == "zin") {
@@ -1271,7 +1394,7 @@ void App::dispatch(const std::string& a) {
     refreshTexts();
   } else if (a == "multi") {
     multiMode_ = false;
-    noteText_ = "已退出框选模式";
+    noteText_ = core::tr("已退出框选模式", "Marquee select mode exited");
     refreshTexts();
   } else if (a == "prevStep") {
     stepIdx_ = stepIdx_ - 1;
@@ -1285,11 +1408,11 @@ void App::dispatch(const std::string& a) {
     stepToSample(1);
   } else if (a == "evalAll") {
     evaluateAll();
-  } else if (a == "trainToggle") {
+  } else if (a == "runToggle" || a == "trainToggle") {
     toggleLoop();
-  } else if (a == "trainPanel") {
-    panel_ = PANEL_TRAIN;
-    panelScroll_ = 0;
+  } else if (a == "runPanel" || a == "trainPanel" || a == "test") {
+    /* 「运行循环」与「按当前结构重新测试」都进同一个面板：跑起来的入口只有一个 */
+    runTest(true);
   } else if (a == "oneStep") {
     stepOnce();
   } else if (a == "zeroLoop") {
@@ -1297,8 +1420,10 @@ void App::dispatch(const std::string& a) {
     loopSteps_ = 0;
     loopStepMs_ = 0;
     trainText_.clear();
-    noteText_ = "训练统计已清零";
+    noteText_ = core::tr("统计已清零：步数、平均奖励与奖励曲线都从这一拍重新算", "Stats reset: steps, mean reward and the reward curve all restart from this step");
     updateLoopText();
+    updateRunTexts();
+    resetCurve();
   } else if (a == "labReset") {
     fields_[F_IN].text = core::LAB_IN_DEFAULT;
     fields_[F_OUT].text = core::LAB_OUT_DEFAULT;
@@ -1315,7 +1440,7 @@ void App::dispatch(const std::string& a) {
     loopSteps_ = 0;
     inVals_.clear();
     resetCurve();
-    noteText_ = "已恢复默认的输入、输出、奖励与目标函数";
+    noteText_ = core::tr("已恢复默认的输入、输出、奖励与目标函数", "Default input, output, reward and target functions restored");
     saveLab();
     runTest(false);
     updateLoopText();
@@ -1376,7 +1501,7 @@ void App::stepToSample(int d) {
 void App::scroll(float dy) {
   if (panel_ == PANEL_LIB) {
     libScroll_ = std::max(0, libScroll_ - static_cast<int>(dy * 40));
-  } else if (panel_ == PANEL_TRAIN || panel_ == PANEL_TEST) {
+  } else if (panel_ == PANEL_RUN) {
     if (dy > 0 && labDocPage_ > 0 && docScroll_ > 0) {
       docScroll_ = std::max(0, docScroll_ - static_cast<int>(dy * 30));
     } else {
@@ -1387,7 +1512,7 @@ void App::scroll(float dy) {
     const ui::Rect cr = canvasRect();
     vp_.zoomAt(dy > 0 ? 1.12 : 1 / 1.12, mouseX_ - cr.x, mouseY_ - cr.y, cr.w, cr.h,
                core::LIM_ZOOM_MIN, core::LIM_ZOOM_MAX);
-    zoomText_ = "缩放 " + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
+    zoomText_ = core::tr("缩放 ", "Zoom ") + std::to_string(static_cast<int>(core::jsRound(vp_.zoom * 100))) + "%";
   }
 }
 

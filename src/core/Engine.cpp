@@ -2,6 +2,8 @@
 
 #include <chrono>
 #include <cmath>
+#include "Lang.h"
+#include "Names.h"
 
 namespace core {
 
@@ -214,7 +216,7 @@ int stepClamp(int n, int cur) {
 
 std::string layerLine(const RunResult& res, int cur) {
   if (res.steps.empty()) {
-    return "画布上没有可运行的层";
+    return tr("画布上没有可运行的层", "No runnable layer on the canvas");
   }
   const int i = stepClamp(static_cast<int>(res.steps.size()), cur);
   const Step& st = res.steps[i];
@@ -264,7 +266,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
   const std::vector<int> order = gOrder(g);
   if (order.empty()) {
     res.ok = false;
-    res.msg = "图中没有模块";
+    res.msg = tr("图中没有模块", "The graph has no modules");
     return res;
   }
   Provider prov(w, gFingerprint(g));
@@ -286,7 +288,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
     const NetModule m = gGet(g, order[oi]);
     Step st;
     st.id = m.id;
-    st.name = m.name;
+    st.name = displayName(m.name);
     st.type = m.type;
     const int64_t t1 = nowMs();
     /* 上游按连线取，而不是按执行顺序取 */
@@ -317,11 +319,11 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
       st.outShape = st.summary;
       st.data = data;
     } else if (up < 0) {
-      st.err = "未接入数据流";
+      st.err = tr("未接入数据流", "not connected to the data flow");
       res.ok = false;
     } else if (m.type == MOD_CONV) {
       if (!hasIn3) {
-        st.err = "上游不是特征图";
+        st.err = tr("上游不是特征图", "the upstream layer is not a feature map");
         res.ok = false;
       } else {
         const int k2 = m.p.k;
@@ -330,7 +332,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
         const T3 y = convForward(in3, m.p.channels, wt, bs, k2, m.p.stride, m.p.pad);
         st.inShape = shapeText3(in3.c, in3.h, in3.w);
         if (y.h <= 0 || y.w <= 0) {
-          st.err = "窗口大于上游尺寸";
+          st.err = tr("窗口大于上游尺寸", "the window is larger than the upstream size");
           res.ok = false;
         } else {
           const std::vector<double> z = applyAct(y.d, m.p.act);
@@ -346,21 +348,21 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
       }
     } else if (m.type == MOD_POOL) {
       if (!hasIn3) {
-        st.err = "上游不是特征图";
+        st.err = tr("上游不是特征图", "the upstream layer is not a feature map");
         res.ok = false;
       } else {
         const T3 y = poolForward(in3, m.p.poolMode, m.p.k, m.p.stride);
         st.inShape = shapeText3(in3.c, in3.h, in3.w);
         if (y.h <= 0 || y.w <= 0) {
-          st.err = "窗口大于上游尺寸";
+          st.err = tr("窗口大于上游尺寸", "the window is larger than the upstream size");
           res.ok = false;
         } else {
           p3[oi] = y;
           ok3[oi] = true;
           st.rank = 3;
           st.dims = {y.c, y.h, y.w};
-          st.summary = (m.p.poolMode == POOL_MAX ? "最大池化 " : "平均池化 ") +
-                       std::to_string(m.p.k) + "×" + std::to_string(m.p.k) + " 步长 " +
+          st.summary = (m.p.poolMode == POOL_MAX ? tr("最大池化 ", "max pooling ") : tr("平均池化 ", "average pooling ")) +
+                       std::to_string(m.p.k) + "×" + std::to_string(m.p.k) + tr(" 步长 ", " stride ") +
                        std::to_string(m.p.stride);
           st.outShape = shapeText3(y.c, y.h, y.w);
           st.data = y.d;
@@ -368,7 +370,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
       }
     } else if (m.type == MOD_FLAT) {
       if (!hasIn3) {
-        st.err = "上游不是特征图";
+        st.err = tr("上游不是特征图", "the upstream layer is not a feature map");
         res.ok = false;
       } else {
         std::vector<double> flat = zeros(in3.size());
@@ -394,7 +396,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
           vec[i] = in3.d[i];
         }
       } else {
-        st.err = "上游没有数据";
+        st.err = tr("上游没有数据", "the upstream layer has no data");
         res.ok = false;
       }
       if (st.err.empty()) {
@@ -413,7 +415,7 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
         st.dims = {static_cast<int>(outV.size())};
         st.inShape = std::to_string(n);
         st.outShape = std::to_string(outV.size());
-        st.summary = std::to_string(n) + " → " + std::to_string(m.p.units) + " 单元";
+        st.summary = std::to_string(n) + " → " + std::to_string(m.p.units) + tr(" 单元", " units");
         st.data = outV;
         if (m.type == MOD_OUT) {
           res.probs = outV;
@@ -428,12 +430,12 @@ RunResult runGraph(const NetGraph& g, const std::vector<double>& px, const Weigh
   if (!res.probs.empty()) {
     res.argmax = argmax(res.probs);
     if (!res.ok) {
-      res.msg = "存在未接入或参数越界的层，结果仅供参考";
+      res.msg = tr("存在未接入或参数越界的层，结果仅供参考", "Some layers are unconnected or out of range; the result is for reference only");
     }
   } else {
     res.ok = false;
     if (res.msg.empty()) {
-      res.msg = "没有输出层，无法给出结果";
+      res.msg = tr("没有输出层，无法给出结果", "No output layer, so there is no result");
     }
   }
   res.pretrained = prov.usedPretrained() && !prov.shapeClash();

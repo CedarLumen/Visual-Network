@@ -9,6 +9,7 @@
 #include "Data.h"
 #include "Engine.h"
 #include "Lab.h"
+#include "Lang.h"
 #include "Library.h"
 #include "Model.h"
 #include "NetText.h"
@@ -17,6 +18,7 @@
 #include "Types.h"
 #include "gfx.h"
 #include "ui.h"
+#include "Names.h"
 
 namespace ui {
 
@@ -30,8 +32,8 @@ enum DragMode {
   DRAG_LINK = 5
 };
 
-/* 浮层面板 */
-enum PanelKind { PANEL_NONE = 0, PANEL_LIB = 1, PANEL_TEST = 2, PANEL_INNER = 3, PANEL_TRAIN = 4 };
+/* 浮层面板：模块库 / 运行循环 / 神经元内部视图 */
+enum PanelKind { PANEL_NONE = 0, PANEL_LIB = 1, PANEL_RUN = 2, PANEL_INNER = 3 };
 
 /* 文本框字段编号 */
 enum FieldId { F_IN = 0, F_OUT = 1, F_REW = 2, F_TGT = 3, F_FREQ = 4, F_COUNT = 5 };
@@ -75,8 +77,8 @@ class App {
   void typeText(const std::string& utf8);
 
   /* 运行与训练（自检与界面共用同一套入口） */
-  void runTest(bool open);
-  void trainStep();
+  void runTest(bool open); /* 跑一次前向并刷新视图（不改权重，不计入统计）：切换示例、结构变化后走它 */
+  void trainStep();        /* 走一个完整的步：按「更新权重」开关决定是否反向更新，计入统计与曲线 */
   void stepOnce();
   void startLoop();
   void stopLoop();
@@ -96,6 +98,7 @@ class App {
 
   /* 状态查询（自检用） */
   int moduleCount() const { return static_cast<int>(graph_.modules.size()); }
+  bool trainable() const; /* 当前结构是否有可训练的层（自生成输入 / 目标输出元件） */
   const core::NetGraph& graph() const { return graph_; }
   const std::string& statusText() const { return statusText_; }
   const std::string& noteText() const { return noteText_; }
@@ -129,6 +132,9 @@ class App {
   /* 输入框里的原始文本（自检用：公式配置会被 normExpr 归一化，看不出逐个字符的编辑） */
   const std::string& fieldText(int i) const { return fields_[i].text; }
   bool controlCenter(const std::string& action, float* x, float* y) const;
+  /* 自检用：控件/输入框是否在当前可视区内（滚出可视区的不接收点击） */
+  bool controlVisible(const std::string& action) const;
+  bool fieldVisible(int fieldId) const;
   bool fieldCenter(int fieldId, float* x, float* y) const;
   /* 自检用：内部视图里第 index 个神经元的中心（窗口坐标）；不在内部视图或下标越界返回 false */
   bool innerNeuronCenter(int index, float* x, float* y) const;
@@ -138,6 +144,9 @@ class App {
 
   /* 存档 */
   void saveAll();
+  /* 界面语言：切换后立刻刷新全部文案，并把选择存进应用数据目录 */
+  void toggleLang();
+  void saveLang();
   void setTimeoutScale(double s) { timeoutScale_ = s; }
 
  private:
@@ -163,7 +172,7 @@ class App {
   bool linkRight_ = true;
   int linkCand_ = -1;
   bool multiMode_ = false;
-  /* 当前浮层面板：PANEL_NONE / PANEL_LIB / PANEL_TEST / PANEL_INNER / PANEL_TRAIN */
+  /* 当前浮层面板：PANEL_NONE / PANEL_LIB / PANEL_RUN / PANEL_INNER */
   int panel_ = PANEL_NONE;
 
   /* 上一帧的控件表：这一帧的事件按它命中，保证「盖在上面的面板先吃到点击」 */
@@ -202,9 +211,10 @@ class App {
   std::string netPre_;
   bool netOn_ = false;
 
-  /* 训练循环与测试循环各管各的游标 */
-  int testSteps_ = 0;
-  int trainIdx_ = 0;
+  /*
+   * 运行循环只有一个游标：步数 loopSteps_ 既是这一拍的时间下标（自生成输入的取值也按它算），
+   * sampleIdx_ 是这一拍用的示例。循环在跑时由循环推进，暂停时由「上一个/下一个示例」手动挪。
+   */
 
   /* 文本 */
   std::string statusText_;
@@ -265,13 +275,11 @@ class App {
   void afterChange();
   void updateLoopText();
   void updateRunTexts();
-  void testTextsTrainable();
   void syncInputVals();
   void fixStepIdx();
   void finalizeStep(core::StepScore& sc);
-  core::RunResult forwardOnce(bool update, int t, int k, bool publishTest);
-  void publishTestView(bool updated);
-  void publishTrainView(int t);
+  core::RunResult forwardOnce(bool update, int t, int k, bool counted);
+  void publishStepViews(bool counted, const core::StepScore& sc, int t, int k, bool updatedWeights);
   void ensureNet();
   void saveGraph();
   void saveLab();
@@ -319,7 +327,17 @@ class App {
   void drawCurve(gfx::Renderer& r, const ui::Rect& box);
   void drawPreview(gfx::Renderer& r, const ui::Rect& box);
   void drawChrome(gfx::Renderer& r);   /* 顶栏 + 工具栏 + 右侧面板 */
-  void drawOverlays(gfx::Renderer& r); /* 模块库 / 测试 / 训练 / 内部视图 */
+  void drawOverlays(gfx::Renderer& r); /* 模块库 / 运行循环 / 内部视图 */
+  /*
+   * 参数行（标签 + 数值 + 加减按钮）。compact=false 是右侧窄面板用的两行式排版，
+   * compact=true 给运行循环那种宽面板用，一行放下标签、范围说明、数值与加减按钮。
+   * 返回下一行的 y（可以直接 y = drawParamRow(...)）。
+   */
+  float drawParamRow(gfx::Renderer& r, float x, float y, float w, const std::string& key,
+                     bool compact);
+  /* 一行等分的小按钮（运行循环面板里成排的按钮都用它） */
+  void rowButtons(gfx::Renderer& r, const ui::Rect& area, const char* const* labels,
+                  const char* const* actions, int n, int fontPx);
   ui::Control* addButton(const ui::Rect& r, const std::string& label, const std::string& action);
   ui::Control* addField(const ui::Rect& r, int fieldId);
 };

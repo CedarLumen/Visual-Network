@@ -1,0 +1,96 @@
+神经网络模拟引擎	Neural Network Simulation Engine
+整图	Fit View
+缩放 100%	Zoom 100%
+错误	Error
+模块库	Module Library
+运行循环	Run Loop
+一键整理	Auto-Arrange
+完成框选	Finish Marquee
+示例网络	Example Network
+查看神经元	View Neurons
+重新随机	Randomize
+复制	Copy
+删除	Delete
+成组	Group
+解组	Ungroup
+全选	Select All
+清空选择	Clear Selection
+删除选中神经元	Delete Selected Neurons
+返回画布	Back to Canvas
+点一下放入画布中央，参数在右侧调节	Click to place it at the center of the canvas; adjust its parameters on the right
+每一步：输入函数给出输入，网络前向一次，输出函数给出判定，奖励函数给出得分；	Each step: the input function supplies the input, the network runs one forward pass, the output function gives the prediction, the reward function gives the score;
+开着「更新权重」时这一步还会反向传播并按学习率更新。	 with "Update Weights" on, this step also backpropagates and updates by the learning rate.
+关闭	Close
+暂停	Pause
+开始	Start
+单步	Single Step
+统计清零	Reset Stats
+重置神经网络	Reset Network
+频率直接填	Type Frequency
+步/秒	steps/s
+频率高于每秒 	Frequency is above 
+ 步：每一拍都要重画热力图、曲线与面板，设得再快也只是不再等待，	 steps/s: every tick redraws the heatmap, the curve, and the panel; setting it any higher only stops the waiting,
+实际速度以循环状态里的单步耗时为准	 actual speed is bounded by the per-step time shown in the loop status
+当前结构没有可训练的层（画布上没有自生成输入或目标输出元件）：	The current structure has no trainable layers (the canvas has no random input or target-output element):
+「更新权重」不会起作用，循环只做前向推理	 "Update Weights" will have no effect; the loop only performs forward inference
+按当前结构重新测试	Re-run Forward Pass
+评估全部示例	Evaluate All Samples
+显卡加速：开	GPU Acceleration: On
+显卡加速：关	GPU Acceleration: Off
+计算后端：	Compute Backend: 
+识别正确 	Correct 
+上一个示例	Prev Sample
+下一个示例	Next Sample
+上一层	Prev Layer
+下一层	Next Layer
+收起函数设置	Collapse Function Settings
+自定义函数	Custom Functions
+恢复默认公式	Restore Default Formulas
+语法与函数表	Syntax and Function Reference
+目标函数	Target Function
+默认 sin(3*in(0))：目标输出奖励元件按它算出期望输出，网络去逼近它	Default sin(3*in(0)): the target-output reward element derives the expected output from it, and the network approximates it
+输入函数	Input Function
+默认 px/255：直接用当前示例的原像素，也就是原来的手写数字输入	Default px/255: uses the raw pixels of the current sample directly, i.e. the original handwritten-digit input
+输出函数	Output Function
+默认 v：不改动网络输出	Default v: leaves the network output unchanged
+奖励函数	Reward Function
+默认 score：判定正确得 1 分，判定错误得 0 分	Default score: 1 point for a correct prediction, 0 points for a wrong one
+说明	Docs
+半成品模块 · 	Group · 
+ 神经元	 neurons
+ 内部 · 	 inside · 
+ 个神经元	 neurons
+输入侧	Input Side
+输出侧	Output Side
+先点开「运行循环」跑一次前向	Open "Run Loop" and run one forward pass first
+画布上没有可运行的层	No runnable layers on the canvas
+开始循环后显示每一步的得分	Per-step scores appear once the loop starts
+最近 	Score of last 
+ 步得分	 steps
+神经网络模拟引擎	Neural Network Simulation Engine
+创建窗口失败：	Failed to create window: 
+初始化 OpenGL 失败：	Failed to initialize OpenGL: 
+ChoosePixelFormat 失败	ChoosePixelFormat failed
+SetPixelFormat 失败	SetPixelFormat failed
+wglCreateContext 失败	wglCreateContext failed
+wglMakeCurrent 失败	wglMakeCurrent failed
+wglMakeCurrent(core) 失败	wglMakeCurrent(core) failed
+wglCreateContextAttribsARB 未给出 3.3 core 上下文，已退回兼容上下文	wglCreateContextAttribsARB did not provide a 3.3 core context; falling back to a compatibility context
+RegisterClassExW 失败	RegisterClassExW failed
+CreateWindowExW 失败（离屏窗口）	CreateWindowExW failed (offscreen window)
+GetDC 失败	GetDC failed
+attachCoreContext：参数为空	attachCoreContext: null argument
+CreateWindowExW 失败	CreateWindowExW failed
+glCreateShader 失败	glCreateShader failed
+着色器编译失败：	Shader compilation failed: 
+着色器程序链接失败：	Shader program link failed: 
+离屏 FBO 不完整（状态 	Offscreen FBO incomplete (status 
+GetDC 失败	GetDC failed
+OpenGL 入口缺失 	Missing 
+ 个：	 OpenGL entries:
+beginFrame：画布尺寸非法	beginFrame: invalid canvas size
+beginOffscreen：尺寸非法	beginOffscreen: invalid size
+写文件失败（第 	Failed to write file (attempt 
+ 次）：	): 
+writePng：尺寸或数据非法	writePng: invalid size or data
+writePng：创建目录失败：	writePng: failed to create directory: 

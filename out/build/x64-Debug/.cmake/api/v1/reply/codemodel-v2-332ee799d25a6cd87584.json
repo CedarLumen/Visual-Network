@@ -1,0 +1,105 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "NeuralNetworkEngineWin",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "nne::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne-Debug-9c1179bbcd5c4244d5e0.json",
+					"name" : "nne",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nne_cli::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne_cli-Debug-2ab956e708c1892b0f15.json",
+					"name" : "nne_cli",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nne_core::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne_core-Debug-23c69d3c8e0688951cf0.json",
+					"name" : "nne_core",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nne_gfx::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne_gfx-Debug-a4f72d7672651935da26.json",
+					"name" : "nne_gfx",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nne_gpu::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne_gpu-Debug-873ac7e1b2dc4529de6f.json",
+					"name" : "nne_gpu",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nne_tests::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nne_tests-Debug-d24c9003502c214e31eb.json",
+					"name" : "nne_tests",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win/out/build/x64-Debug",
+		"source" : "C:/Users/CMZ/OneDrive/Desktop/workspace/NeuralNetworkEngine-Win"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 8
+	}
+}

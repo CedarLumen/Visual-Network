@@ -1,6 +1,6 @@
 /*
  * 图形界面程序：建窗口、OpenGL 上下文、主循环。
- * 训练循环由主循环按设定频率推进（单步耗时超过周期时不再等待，全速跑）。
+ * 运行循环由主循环按设定频率推进（单拍耗时超过周期时不再等待，全速跑）。
  */
 #include <windows.h>
 
@@ -12,6 +12,7 @@
 #include "app.h"
 #include "gfx.h"
 #include "gpu.h"
+#include "Lang.h"
 
 namespace {
 
@@ -71,15 +72,16 @@ int main() {
   SetProcessDPIAware();
   std::string err;
   gfx::Window win;
-  if (!win.create(L"神经网络模拟引擎", 1360, 880, true, &err)) {
-    const std::string msg = "创建窗口失败：" + err;
-    MessageBoxA(nullptr, msg.c_str(), "神经网络模拟引擎", MB_ICONERROR);
+  if (!win.create(core::trw(L"神经网络模拟引擎", L"Neural Network Simulation Engine"), 1360, 880,
+                  true, &err)) {
+    const std::string msg = core::tr("创建窗口失败：", "Failed to create window: ") + err;
+    MessageBoxA(nullptr, msg.c_str(), core::tr("神经网络模拟引擎", "Neural Network Simulation Engine"), MB_ICONERROR);
     return 1;
   }
   gfx::Renderer renderer;
   if (!renderer.init(win.hwnd(), &err)) {
-    const std::string msg = "初始化 OpenGL 失败：" + err;
-    MessageBoxA(nullptr, msg.c_str(), "神经网络模拟引擎", MB_ICONERROR);
+    const std::string msg = core::tr("初始化 OpenGL 失败：", "Failed to initialize OpenGL: ") + err;
+    MessageBoxA(nullptr, msg.c_str(), core::tr("神经网络模拟引擎", "Neural Network Simulation Engine"), MB_ICONERROR);
     return 1;
   }
 
@@ -90,6 +92,9 @@ int main() {
              win.height() - static_cast<int>(ui::TOPBAR_H + ui::TOOLBAR_H));
   std::string aerr;
   app.load(findAssets(), dataDir(), &aerr);
+  /* 界面语言是启动后从存档读进来的：窗口标题按读完之后的语言再设一次 */
+  SetWindowTextW(static_cast<HWND>(win.hwnd()),
+                 core::trw(L"神经网络模拟引擎", L"Neural Network Simulation Engine"));
 
   double nextTickAt = 0;
   bool running = true;

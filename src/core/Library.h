@@ -29,7 +29,9 @@ struct LibEntry {
       : key(std::move(k)), title(std::move(t)), desc(std::move(d)), build(std::move(b)) {}
 };
 
-extern const std::vector<LibEntry> LIB_ENTRIES;
+extern std::vector<LibEntry> LIB_ENTRIES; /* 语言一变会重建，所以不是 const */
+/* 按当前语言重建模块库条目（由 Lang 的钩子调用） */
+void rebuildLibraryTexts();
 
 /* 自带示例网络：与 tools/out/weights.json 训练出来的结构逐项一致 */
 NetGraph buildExample();
